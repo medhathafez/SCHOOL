@@ -1,0 +1,624 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>أنا أتحدث</title>
+    
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Naskh+Arabic:wght@400;700;900&family=Amiri:wght@700&display=swap" rel="stylesheet">
+    
+    <style>
+        /* ================= التنسيقات العامة ================= */
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'Noto Naskh Arabic', serif;
+            background-color: #f9fafb;
+            min-height: 100vh; 
+            display: flex;
+            flex-direction: column;
+            overflow-x: hidden;
+        }
+
+        /* ================= شاشة الدخول (Welcome Screen) ================= */
+        .welcome-screen {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background-color: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            z-index: 2000;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            direction: ltr; /* اللغة الإنجليزية */
+        }
+
+        .welcome-box {
+            background: white;
+            padding: 40px;
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            text-align: center;
+            max-width: 400px;
+            width: 90%;
+            font-family: sans-serif;
+        }
+
+        .welcome-box h2 {
+            color: #1f2937;
+            margin-bottom: 10px;
+            font-size: 24px;
+        }
+
+        .welcome-box p {
+            color: #6b7280;
+            margin-bottom: 25px;
+            font-size: 15px;
+        }
+
+        .welcome-box input {
+            width: 100%;
+            padding: 12px 15px;
+            border: 2px solid #e5e7eb;
+            border-radius: 8px;
+            font-size: 16px;
+            margin-bottom: 20px;
+            outline: none;
+            transition: border-color 0.3s;
+        }
+
+        .welcome-box input:focus {
+            border-color: #3b82f6;
+        }
+
+        .start-btn {
+            background-color: #3b82f6;
+            color: white;
+            border: none;
+            padding: 12px 30px;
+            border-radius: 8px;
+            font-size: 18px;
+            font-weight: bold;
+            cursor: pointer;
+            width: 100%;
+            transition: all 0.3s;
+        }
+
+        .start-btn:hover { background-color: #2563eb; }
+        .start-btn:disabled { background-color: #9ca3af; cursor: not-allowed; }
+
+        /* ================= الترجمة عند التمرير ================= */
+        .hover-translate { cursor: pointer; }
+        .hover-translate .text-ar { display: inline-block; }
+        .hover-translate .text-en {
+            display: none; direction: ltr; font-family: sans-serif; font-size: 0.9em; 
+        }
+        .hover-translate:hover .text-ar, .hover-translate:active .text-ar { display: none; }
+        .hover-translate:hover .text-en, .hover-translate:active .text-en { display: inline-block; }
+
+        /* ================= الشريط العلوي ================= */
+        .top-bar {
+            display: flex; justify-content: space-between; align-items: center; 
+            padding: 15px 30px; width: 100%; background-color: #ffffff;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05); margin-bottom: 20px;
+        }
+
+        .top-right-group { display: flex; align-items: center; gap: 15px; }
+        .top-left-group { display: flex; align-items: center; gap: 15px; }
+        .logo-img { width: 60px; height: auto; object-fit: contain; } 
+
+        /* ================= حاوية أيقونة TAT ومعايير التقييم ================= */
+        .tat-wrapper { position: relative; display: flex; justify-content: center; }
+        .criteria-container {
+            position: absolute; top: 100%; margin-top: 5px; white-space: nowrap;
+            display: flex; justify-content: center;
+        }
+        .criteria-text {
+            font-family: 'Amiri', serif; font-size: 14px; color: #d97706; 
+            text-decoration: none; transition: all 0.3s ease;
+            text-shadow: 0 0 3px #fcd34d, 0 0 6px #fcd34d, 0 0 10px #fbbf24;
+            display: inline-block;
+        }
+        .criteria-text:hover {
+            text-shadow: 0 0 6px #fcd34d, 0 0 12px #fcd34d, 0 0 20px #fbbf24, 0 0 25px #d97706;
+            transform: scale(1.05);
+        }
+
+        .goal-box {
+            background-color: #16a34a; color: #ffffff; font-size: 15px; font-weight: bold;
+            padding: 8px 20px; border-radius: 8px; text-align: center; cursor: pointer;
+            display: flex; justify-content: center; align-items: center;
+            min-width: 420px; box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+        .goal-ar { display: block; }
+        .goal-en { display: none; direction: ltr; font-family: sans-serif; font-size: 14px; }
+        .goal-box:hover .goal-ar { display: none; }
+        .goal-box:hover .goal-en { display: block; }
+
+        .main-text { font-size: 26px; font-weight: 900; color: #1f2937; }
+        .main-icon { font-size: 26px; }
+
+        /* ================= التصميم الشبكي (المحتوى + الشريط الجانبي الأيسر) ================= */
+        .main-layout {
+            display: flex;
+            flex-direction: row; /* العناصر تترتب من اليمين لليسار بسبب dir=rtl */
+            gap: 25px;
+            max-width: 1200px;
+            width: 100%;
+            margin: 0 auto;
+            padding: 0 30px 20px 30px;
+            flex-grow: 1;
+        }
+
+        .content-area {
+            flex: 2.5; 
+            display: flex; flex-direction: column; gap: 15px; 
+        }
+
+        .instructions-sidebar {
+            flex: 1;
+            background-color: #ffffff;
+            border-radius: 12px;
+            padding: 25px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.03);
+            border: 1px solid #e5e7eb;
+            direction: ltr; /* اتجاه النص من اليسار لليمين */
+            text-align: left;
+            height: fit-content;
+            font-family: sans-serif;
+        }
+
+        .instructions-sidebar h3 {
+            color: #111827;
+            font-size: 18px;
+            margin-bottom: 15px;
+            border-bottom: 2px solid #f3f4f6;
+            padding-bottom: 10px;
+        }
+
+        .instructions-sidebar ul {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        .instructions-sidebar li {
+            font-size: 15px;
+            color: #4b5563;
+            margin-bottom: 15px;
+            line-height: 1.5;
+            display: flex;
+            align-items: flex-start;
+            gap: 10px;
+        }
+
+        .instructions-sidebar .emoji {
+            font-size: 18px;
+            flex-shrink: 0;
+        }
+
+        /* ================= تنسيق النافذة المنبثقة للصورة ================= */
+        .image-modal {
+            display: none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%;
+            background-color: rgba(0,0,0,0.85); justify-content: center; align-items: center; flex-direction: column;
+        }
+        .modal-content-img {
+            max-width: 90%; max-height: 85%; border-radius: 10px;
+            box-shadow: 0 0 20px rgba(255,255,255,0.2); animation: zoomIn 0.3s ease;
+        }
+        .close-modal-btn {
+            position: absolute; top: 20px; right: 30px; color: white; font-size: 40px;
+            font-weight: bold; cursor: pointer; transition: color 0.3s;
+        }
+        .close-modal-btn:hover { color: #ef4444; }
+
+        @keyframes zoomIn { from {transform: scale(0.8); opacity: 0;} to {transform: scale(1); opacity: 1;} }
+
+        /* ================= باقي تنسيقات الأسئلة ================= */
+        .question-row {
+            display: flex; align-items: center; justify-content: space-between;
+            background-color: #ffffff; padding: 15px 20px; border-radius: 10px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.03); border: 1px solid #e5e7eb; width: 100%;
+        }
+        .question-info { display: flex; align-items: center; gap: 12px; flex-grow: 1; }
+        .play-q-btn {
+            background: none; border: none; font-size: 24px; cursor: pointer;
+            transition: transform 0.2s ease; outline: none;
+        }
+        .play-q-btn:hover { transform: scale(1.2); }
+        .play-q-btn:active { transform: scale(0.9); }
+        .question-text { font-size: 21px; font-weight: 700; color: #111827; direction: rtl; line-height: 1.6; }
+
+        .controls-area { display: flex; align-items: center; gap: 15px; }
+        .record-btn {
+            background-color: #3b82f6; color: white; font-size: 20px; width: 50px; height: 50px;
+            border: none; border-radius: 50%; cursor: pointer; transition: all 0.3s;
+            display: flex; justify-content: center; align-items: center;
+            box-shadow: 0 4px 10px rgba(59, 130, 246, 0.3);
+            flex-shrink: 0;
+        }
+        .record-btn:hover { background-color: #2563eb; transform: scale(1.05); }
+        .record-btn.recording { background-color: #ef4444; animation: pulse 1.5s infinite; }
+
+        @keyframes pulse {
+            0% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.7); }
+            70% { box-shadow: 0 0 0 10px rgba(239, 68, 68, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0); }
+        }
+
+        .audio-player { display: none; height: 35px; width: 200px; }
+
+        /* ================= زر الإرسال ================= */
+        .submit-container { display: flex; justify-content: center; margin-top: 15px; }
+        .submit-btn {
+            background-color: #10b981; color: white; font-size: 20px; font-weight: bold;
+            font-family: 'Noto Naskh Arabic', serif; padding: 12px 40px; border: none;
+            border-radius: 50px; cursor: pointer; box-shadow: 0 5px 15px rgba(16, 185, 129, 0.4);
+            transition: all 0.3s; display: flex; align-items: center; gap: 10px;
+        }
+        .submit-btn:hover { background-color: #059669; transform: translateY(-2px); }
+        .submit-btn:disabled { background-color: #9ca3af; cursor: not-allowed; transform: none; box-shadow: none; }
+
+        /* للتجاوب مع الشاشات الصغيرة */
+        @media (max-width: 900px) {
+            .main-layout { flex-direction: column; }
+            .instructions-sidebar { width: 100%; order: -1; } /* تظهر التعليمات أولاً في الجوال */
+        }
+    </style>
+</head>
+<body>
+
+    <div id="welcome-screen" class="welcome-screen">
+        <div class="welcome-box">
+            <h2>Speaking Activity</h2>
+            <p>Please enter your name to start the lesson</p>
+            <input type="text" id="student-name-input" placeholder="Your Full Name" autocomplete="off">
+            <button id="start-activity-btn" class="start-btn" disabled>Start</button>
+        </div>
+    </div>
+
+    <div class="top-bar">
+        <div class="top-right-group">
+            <img src="lo.png" alt="LO" class="logo-img">
+            <div class="goal-box">
+                <span class="goal-ar">الهَدَفُ: أَنْ يَتَحَدَّثَ بِشَكْلٍ مُتَرَابِطٍ فِي حِوَارٍ بِاسْتِخْدَامِ التَّرَاكِيبِ الجَدِيدَةِ.</span>
+                <span class="goal-en">Objective: To speak coherently in a dialogue using the new structures.</span>
+            </div>
+        </div>
+        <div class="top-left-group">
+            <span class="main-text hover-translate">
+                <span class="text-ar">أَنَا أَتَحَدَّثُ</span>
+                <span class="text-en">I am speaking</span>
+            </span>
+            <span class="main-icon">🗣️</span>
+            
+            <div class="tat-wrapper">
+                <img src="tat.png" alt="TAT" class="logo-img">
+                <div class="criteria-container">
+                    <span class="criteria-text hover-translate" id="openCriteriaBtn">
+                        <span class="text-ar">(مَعَايِيرُ التَّقْيِيمِ)</span>
+                        <span class="text-en">(Evaluation Criteria)</span>
+                    </span>
+                </div>
+            </div>
+            
+        </div>
+    </div>
+
+    <div class="main-layout">
+        
+        <div class="content-area">
+            
+            <div class="question-row">
+                <div class="question-info">
+                    <button class="play-q-btn" title="استمع للسؤال">🔊</button>
+                    <div class="question-text hover-translate">
+                        <span class="text-ar">1- مَتَى أُقِيمَ الْيَوْمُ الرِّيَاضِيُّ فِي مَدْرَسَتِكَ؟</span>
+                        <span class="text-en">1- When was the sports day held at your school?</span>
+                    </div>
+                </div>
+                <div class="controls-area">
+                    <audio id="audio-1" class="audio-player" controls></audio>
+                    <button class="record-btn" data-id="1" title="تسجيل/إيقاف إجابتك">🎙️</button>
+                </div>
+            </div>
+
+            <div class="question-row">
+                <div class="question-info">
+                    <button class="play-q-btn" title="استمع للسؤال">🔊</button>
+                    <div class="question-text hover-translate">
+                        <span class="text-ar">2- صِفِ الْيَوْمَ الرِّيَاضِيَّ فِي مَدْرَسَتِكَ.</span>
+                        <span class="text-en">2- Describe the sports day at your school.</span>
+                    </div>
+                </div>
+                <div class="controls-area">
+                    <audio id="audio-2" class="audio-player" controls></audio>
+                    <button class="record-btn" data-id="2" title="تسجيل/إيقاف إجابتك">🎙️</button>
+                </div>
+            </div>
+
+            <div class="question-row">
+                <div class="question-info">
+                    <button class="play-q-btn" title="استمع للسؤال">🔊</button>
+                    <div class="question-text hover-translate">
+                        <span class="text-ar">3- مَا الْمُسَابَقَاتُ الَّتِي شَارَكْتَ فِيهَا؟ وَهَلْ فُزْتَ أَمْ خَسِرْتَ؟</span>
+                        <span class="text-en">3- What competitions did you participate in? And did you win or lose?</span>
+                    </div>
+                </div>
+                <div class="controls-area">
+                    <audio id="audio-3" class="audio-player" controls></audio>
+                    <button class="record-btn" data-id="3" title="تسجيل/إيقاف إجابتك">🎙️</button>
+                </div>
+            </div>
+
+            <div class="submit-container">
+                <button id="submit-btn" class="submit-btn" disabled>
+                    <span id="submit-text" class="hover-translate">
+                        <span class="text-ar">حفظ وإرسال الإجابات</span>
+                        <span class="text-en">Save and submit answers</span>
+                    </span>
+                    <span>💾</span>
+                </button>
+            </div>
+        </div>
+
+        <div class="instructions-sidebar">
+            <h3>How to use:</h3>
+            <ul>
+                <li>
+                    <span class="emoji">🔊</span>
+                    <span>Click to listen to the question in Arabic.</span>
+                </li>
+                <li>
+                    <span class="emoji">🎙️</span>
+                    <span>Click the mic to start recording your answer.</span>
+                </li>
+                <li>
+                    <span class="emoji">⏹️</span>
+                    <span>Click the square to stop recording.</span>
+                </li>
+                <li>
+                    <span class="emoji">✔️</span>
+                    <span>Record answers for all 3 questions to unlock the save button.</span>
+                </li>
+                <li>
+                    <span class="emoji">💾</span>
+                    <span>Click "Save and submit" to download your full audio file.</span>
+                </li>
+            </ul>
+        </div>
+
+    </div>
+
+    <div id="imageModal" class="image-modal">
+        <span class="close-modal-btn" id="closeModalBtn">&times;</span>
+        <img src="ssc.png" alt="معايير التقييم" class="modal-content-img">
+    </div>
+
+    <script>
+        /* ================= شاشة الدخول ================= */
+        let studentName = "Student";
+        const welcomeScreen = document.getElementById('welcome-screen');
+        const nameInput = document.getElementById('student-name-input');
+        const startBtn = document.getElementById('start-activity-btn');
+
+        nameInput.addEventListener('input', () => {
+            if (nameInput.value.trim().length > 0) {
+                startBtn.disabled = false;
+            } else {
+                startBtn.disabled = true;
+            }
+        });
+
+        startBtn.addEventListener('click', () => {
+            studentName = nameInput.value.trim().replace(/\s+/g, '_'); 
+            welcomeScreen.style.display = 'none';
+        });
+
+        /* ================= فتح وإغلاق نافذة المعايير ================= */
+        const openCriteriaBtn = document.getElementById('openCriteriaBtn');
+        const imageModal = document.getElementById('imageModal');
+        const closeModalBtn = document.getElementById('closeModalBtn');
+
+        openCriteriaBtn.addEventListener('click', () => { imageModal.style.display = 'flex'; });
+        closeModalBtn.addEventListener('click', () => { imageModal.style.display = 'none'; });
+        imageModal.addEventListener('click', (event) => {
+            if (event.target === imageModal) { imageModal.style.display = 'none'; }
+        });
+
+        /* ================= القراءة الآلية (Text-to-Speech) ================= */
+        function playTTS(text) {
+            if ('speechSynthesis' in window) {
+                window.speechSynthesis.cancel(); 
+                let cleanText = text.replace(/^[0-9-]+\s*/, ''); 
+                let msg = new SpeechSynthesisUtterance(cleanText);
+                msg.lang = 'ar-SA';
+                msg.rate = 0.8; 
+                window.speechSynthesis.speak(msg);
+            }
+        }
+
+        const playQBtns = document.querySelectorAll('.play-q-btn');
+        playQBtns.forEach(btn => {
+            btn.addEventListener('click', () => {
+                const questionText = btn.closest('.question-row').querySelector('.text-ar').innerText;
+                playTTS(questionText);
+            });
+        });
+
+        /* ================= تسجيل إجابات الطالب ================= */
+        const audioChunksMap = { 1: [], 2: [], 3: [] };
+        const audioBlobsMap = { 1: null, 2: null, 3: null };
+        let mediaRecorder;
+        let currentRecordingId = null;
+
+        const recordBtns = document.querySelectorAll('.record-btn');
+        const submitBtn = document.getElementById('submit-btn');
+        const submitText = document.getElementById('submit-text');
+
+        function checkSubmitStatus() {
+            if (audioBlobsMap[1] && audioBlobsMap[2] && audioBlobsMap[3]) {
+                submitBtn.disabled = false;
+            } else {
+                submitBtn.disabled = true;
+            }
+        }
+
+        recordBtns.forEach(btn => {
+            btn.addEventListener('click', async () => {
+                const qId = btn.getAttribute('data-id');
+                const audioPlayer = document.getElementById(`audio-${qId}`);
+
+                if ('speechSynthesis' in window) {
+                    window.speechSynthesis.cancel();
+                }
+
+                if (currentRecordingId === qId) {
+                    mediaRecorder.stop();
+                    currentRecordingId = null;
+                    btn.classList.remove('recording');
+                    btn.innerText = "🎙️";
+                    return;
+                }
+
+                if (currentRecordingId !== null) {
+                    alert("Please stop the current recording first. | الرجاء إيقاف التسجيل الحالي أولاً.");
+                    return;
+                }
+
+                try {
+                    const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+                    mediaRecorder = new MediaRecorder(stream);
+                    audioChunksMap[qId] = []; 
+
+                    mediaRecorder.ondataavailable = event => {
+                        audioChunksMap[qId].push(event.data);
+                    };
+
+                    mediaRecorder.onstop = () => {
+                        const blob = new Blob(audioChunksMap[qId], { type: 'audio/webm' });
+                        audioBlobsMap[qId] = blob;
+                        
+                        audioPlayer.src = URL.createObjectURL(blob);
+                        audioPlayer.style.display = 'block';
+                        
+                        stream.getTracks().forEach(track => track.stop());
+                        checkSubmitStatus(); 
+                    };
+
+                    mediaRecorder.start();
+                    currentRecordingId = qId;
+                    btn.classList.add('recording');
+                    btn.innerText = "⏹️"; 
+                    audioPlayer.style.display = 'none'; 
+                    
+                } catch (err) {
+                    alert("Microphone not found or permission denied. | لم يتم العثور على ميكروفون أو لم يتم إعطاء الصلاحية.");
+                }
+            });
+        });
+
+        /* ================= دمج الصوتيات بصيغة WAV ================= */
+        async function mergeAudioBlobs(blobs) {
+            const AudioContext = window.AudioContext || window.webkitAudioContext;
+            const audioCtx = new AudioContext();
+            const buffers = [];
+            let totalLength = 0;
+
+            for (let blob of blobs) {
+                const arrayBuffer = await blob.arrayBuffer();
+                const audioBuffer = await audioCtx.decodeAudioData(arrayBuffer);
+                buffers.push(audioBuffer);
+                totalLength += audioBuffer.length;
+            }
+
+            const offlineCtx = new OfflineAudioContext(1, totalLength, buffers[0].sampleRate);
+            let offset = 0;
+            
+            for (let buffer of buffers) {
+                const source = offlineCtx.createBufferSource();
+                source.buffer = buffer;
+                source.connect(offlineCtx.destination);
+                source.start(offset);
+                offset += buffer.duration;
+            }
+
+            const renderedBuffer = await offlineCtx.startRendering();
+            return audioBufferToWav(renderedBuffer);
+        }
+
+        function audioBufferToWav(buffer) {
+            const numOfChan = buffer.numberOfChannels;
+            const length = buffer.length * numOfChan * 2 + 44;
+            const outputBuffer = new ArrayBuffer(length);
+            const view = new DataView(outputBuffer);
+            const channels = [];
+            let offset = 0, pos = 0;
+
+            function setUint16(data) { view.setUint16(pos, data, true); pos += 2; }
+            function setUint32(data) { view.setUint32(pos, data, true); pos += 4; }
+
+            setUint32(0x46464952); setUint32(length - 8); setUint32(0x45564157);
+            setUint32(0x20746d66); setUint32(16); setUint16(1); setUint16(numOfChan);
+            setUint32(buffer.sampleRate); setUint32(buffer.sampleRate * 2 * numOfChan);
+            setUint16(numOfChan * 2); setUint16(16); setUint32(0x61746164); setUint32(length - pos - 4);
+
+            for(let i = 0; i < buffer.numberOfChannels; i++) channels.push(buffer.getChannelData(i));
+
+            while(pos < length) {
+                for(let i = 0; i < numOfChan; i++) {
+                    let sample = Math.max(-1, Math.min(1, channels[i][offset]));
+                    sample = (0.5 + sample < 0 ? sample * 32768 : sample * 32767) | 0;
+                    view.setInt16(pos, sample, true); pos += 2;
+                }
+                offset++;
+            }
+            return new Blob([outputBuffer], {type: "audio/wav"});
+        }
+
+        submitBtn.addEventListener('click', async () => {
+            submitBtn.disabled = true;
+            
+            submitText.querySelector('.text-ar').innerText = "جاري الدمج والتحميل... ⏳";
+            submitText.querySelector('.text-en').innerText = "Merging and downloading... ⏳";
+
+            const blobsToMerge = [];
+            if (audioBlobsMap[1]) blobsToMerge.push(audioBlobsMap[1]);
+            if (audioBlobsMap[2]) blobsToMerge.push(audioBlobsMap[2]);
+            if (audioBlobsMap[3]) blobsToMerge.push(audioBlobsMap[3]);
+
+            if (blobsToMerge.length === 0) return;
+
+            try {
+                const mergedBlob = await mergeAudioBlobs(blobsToMerge);
+                
+                const url = URL.createObjectURL(mergedBlob);
+                const a = document.createElement('a');
+                a.style.display = 'none';
+                a.href = url;
+                
+                a.download = `${studentName}_Speaking_Activity_Sports_Lesson.wav`; 
+                
+                document.body.appendChild(a);
+                a.click();
+                
+                setTimeout(() => {
+                    document.body.removeChild(a);
+                    window.URL.revokeObjectURL(url);
+                    
+                    submitText.querySelector('.text-ar').innerText = "تم الحفظ بنجاح! ✅";
+                    submitText.querySelector('.text-en').innerText = "Saved successfully! ✅";
+                }, 100);
+
+            } catch (error) {
+                console.error("Error merging audio:", error);
+                alert("An error occurred while merging files. | حدث خطأ أثناء دمج الملفات.");
+                submitBtn.disabled = false;
+                
+                submitText.querySelector('.text-ar').innerText = "حفظ وإرسال الإجابات";
+                submitText.querySelector('.text-en').innerText = "Save and submit answers";
+            }
+        });
+    </script>
+</body>
+</html>

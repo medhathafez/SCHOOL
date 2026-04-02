@@ -1,0 +1,657 @@
+<!DOCTYPE html>
+<html lang="ar">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>تراكيب جديدة - تفاعلي وصوتي</title>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Naskh+Arabic:wght@400;700;900&display=swap" rel="stylesheet">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        
+        body {
+            background-color: #f3f4f6; 
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            padding: 1vh 1vw; 
+            font-family: 'Simplified Arabic', 'Noto Naskh Arabic', serif; 
+            overflow: hidden; 
+        }
+
+        .app-container {
+            display: flex;
+            flex-direction: column;
+            width: 100%;
+            max-width: 1400px;
+            background: white;
+            border-radius: 12px; 
+            box-shadow: 0 5px 20px rgba(0,0,0,0.08);
+            height: 98vh; 
+            overflow: hidden;
+            position: relative;
+        }
+
+        /* --- شريط الرأس المدمج --- */
+        .top-header {
+            display: flex;
+            justify-content: space-between; 
+            align-items: center; 
+            padding: 8px 15px; 
+            direction: rtl; 
+            border-bottom: 2px solid #e5e7eb;
+            background-color: #ffffff;
+            flex-shrink: 0; 
+        }
+
+        .right-group {
+            display: flex;
+            align-items: center;
+            gap: 15px; 
+            flex-wrap: wrap;
+        }
+
+        .objective-container {
+            display: flex;
+            align-items: center;
+            gap: 5px; 
+        }
+
+        .header-icon {
+            height: 35px; 
+            width: auto;
+            object-fit: contain;
+            background-color: transparent;
+        }
+
+        .objective-box {
+            background-color: #dcfce7; 
+            color: #000000; 
+            font-size: 16px; 
+            font-weight: 900; 
+            padding: 4px 12px;
+            border-radius: 8px;
+            border: 1px solid #bbf7d0;
+            white-space: nowrap; 
+            cursor: pointer;
+            text-align: center;
+            min-width: 330px; 
+        }
+        
+        .obj-ar { font-family: 'Simplified Arabic', 'Noto Naskh Arabic', serif; }
+        .obj-en { display: none; font-family: sans-serif; font-size: 13px; font-weight: bold; direction: ltr; color: #059669; }
+        .objective-box:hover .obj-ar { display: none; }
+        .objective-box:hover .obj-en { display: block; }
+
+        /* --- شريط التبويبات --- */
+        .tabs-nav {
+            display: flex;
+            gap: 6px; 
+            direction: rtl;
+        }
+
+        .tab-btn {
+            background-color: #ffffff;
+            border: 2px solid #e5e7eb;
+            border-radius: 6px; 
+            padding: 0 10px; 
+            cursor: pointer;
+            height: 32px; 
+            min-width: 100px; 
+            text-align: center;
+            transition: all 0.3s ease;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .tab-btn.active {
+            border-color: #10b981; 
+            background-color: #ecfdf5;
+            box-shadow: inset 0 0 0 1px rgba(16, 185, 129, 0.2);
+        }
+
+        .tab-text-ar {
+            color: #000000;
+            font-size: 15px; 
+            font-weight: 900;
+            font-family: 'Simplified Arabic', 'Noto Naskh Arabic', serif;
+        }
+        
+        .tab-text-en {
+            display: none; 
+            color: #059669; 
+            font-size: 10px; 
+            font-weight: bold;
+            font-family: sans-serif; 
+            direction: ltr;
+        }
+
+        .tab-btn:hover .tab-text-ar { display: none; }
+        .tab-btn:hover .tab-text-en { display: block; }
+
+        .left-icons-container {
+            display: flex;
+            align-items: center;
+            gap: 10px; 
+            flex-shrink: 0;
+        }
+
+        /* --- مساحة محتوى النشاط --- */
+        .tabs-content {
+            padding: 20px 20px 10px 80px; 
+            flex-grow: 1; 
+            direction: rtl;
+            background-color: #fefce8; 
+            overflow-y: auto; 
+            position: relative; 
+        }
+
+        .bloom-image {
+            position: fixed; 
+            left: 2vw; 
+            top: 50%; 
+            transform: translateY(-50%);
+            width: 70px; 
+            height: auto;
+            max-height: 70vh; 
+            object-fit: contain;
+            mix-blend-mode: multiply; 
+            pointer-events: none; 
+            z-index: 10;
+        }
+
+        .tab-pane {
+            display: none; 
+            animation: fadeIn 0.3s ease;
+            min-height: 100%; 
+        }
+
+        .tab-pane.active {
+            display: flex; 
+            flex-direction: column;
+            align-items: center; 
+        }
+
+        /* --- تنسيقات التراكيب --- */
+        
+        .interactive-sentence {
+            font-size: 2.2vw; 
+            font-weight: 900;
+            text-align: center;
+            margin-bottom: 20px; 
+            display: flex;
+            flex-wrap: wrap; 
+            justify-content: center;
+            align-items: center;
+            gap: 0.5vw; 
+            width: 100%;
+            cursor: pointer;
+            padding: 5px;
+            border-radius: 12px;
+            transition: background-color 0.3s ease;
+        }
+
+        .interactive-sentence:hover {
+            background-color: rgba(0, 0, 0, 0.03);
+        }
+
+        .speaker-icon {
+            font-size: 2.5vw;
+            margin-left: 10px;
+            user-select: none;
+            transition: transform 0.2s;
+        }
+        .interactive-sentence:hover .speaker-icon {
+            transform: scale(1.15);
+        }
+
+        /* الألوان */
+        .normal-word { color: #000000; }
+        .green-word { color: #16a34a; }
+        .blue-word { color: #0284c7; } 
+        .red-word { color: #dc2626; } 
+
+        .word-hover {
+            position: relative;
+            transition: transform 0.2s;
+            padding: 0 4px;
+        }
+
+        .word-hover:hover {
+            transform: scale(1.05); 
+        }
+
+        .word-hover::after {
+            content: attr(data-en);
+            position: absolute;
+            bottom: 100%;
+            left: 50%;
+            transform: translateX(-50%) translateY(-10px);
+            background-color: #1f2937; 
+            color: #ffffff;
+            font-size: 11px; 
+            font-family: sans-serif;
+            padding: 3px 6px; 
+            border-radius: 6px;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s ease;
+            white-space: nowrap;
+            pointer-events: none; 
+            font-weight: bold;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            z-index: 9999; 
+        }
+
+        .word-hover::before {
+            content: '';
+            position: absolute;
+            bottom: 100%; 
+            left: 50%;
+            transform: translateX(-50%) translateY(2px);
+            border-width: 6px;
+            border-style: solid;
+            border-color: #1f2937 transparent transparent transparent;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s ease;
+            pointer-events: none;
+            z-index: 9999;
+        }
+
+        .word-hover:hover::after,
+        .word-hover:hover::before {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .target-word {
+            background-color: transparent; 
+            padding: 0 5px;
+            border-radius: 6px;
+            color: #000;
+            border: 2px dashed #000;
+            min-width: 40px;
+            display: inline-block;
+        }
+
+        /* تأثير التظليل أثناء القراءة الصوتية */
+        .reading-highlight {
+            background-color: #fca5a5 !important;
+            border-radius: 6px;
+            box-shadow: 0 0 8px rgba(252, 165, 165, 0.6);
+            color: #000 !important;
+            transition: background-color 0.1s ease;
+        }
+
+        .vocab-card.reading-highlight {
+            background-color: #3b82f6 !important;
+            border-color: #2563eb !important;
+            color: white !important;
+            transform: scale(1.05);
+            box-shadow: 0 8px 20px rgba(59, 130, 246, 0.4);
+        }
+
+        .vocab-card.reading-highlight .vocab-ar {
+            display: block !important;
+            color: white !important;
+        }
+
+        .vocab-card.reading-highlight .vocab-en {
+            display: none !important;
+        }
+
+        /* الشبكات الجديدة للتراكيب */
+        .vocab-grid-3col {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 8px; 
+            width: 100%;
+            max-width: 1200px;
+            margin-top: 5px;
+        }
+
+        .vocab-grid-2col {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 8px; 
+            width: 100%;
+            max-width: 800px;
+            margin-top: 5px;
+        }
+
+        .vocab-col {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+
+        .vocab-card {
+            background-color: #e5e7eb;
+            border: 1px solid #d1d5db;
+            border-radius: 0;
+            padding: 5px 10px; 
+            text-align: center;
+            font-size: 16px; 
+            font-weight: bold;
+            color: #000;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 40px; 
+        }
+
+        .vocab-card:hover {
+            background-color: #10b981;
+            border-color: #059669;
+            color: #ffffff;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(16, 185, 129, 0.2);
+        }
+
+        .vocab-ar { font-family: 'Simplified Arabic', 'Noto Naskh Arabic', serif; transition: opacity 0.2s; }
+        .vocab-en { display: none; font-family: sans-serif; font-size: 14px; direction: ltr; }
+        .vocab-card:hover .vocab-ar { display: none; }
+        .vocab-card:hover .vocab-en { display: block; }
+
+        /* الجمل المجمعة في الأسفل */
+        .assembled-sentence {
+            width: 100%;
+            text-align: center; 
+            color: #000; 
+            font-size: 2vw; 
+            font-weight: bold;
+            margin-top: auto; 
+            padding-top: 10px; 
+            line-height: 1.5;
+        }
+
+        .synonym-table {
+            border-collapse: collapse;
+            width: 300px;
+            text-align: center;
+            margin-bottom: 15px; 
+            font-weight: bold;
+            font-size: 1.4rem; 
+            background-color: #fff;
+        }
+        .synonym-table td {
+            border: 2px solid #000;
+            padding: 8px; 
+        }
+
+        .en-sub {
+            display: block;
+            font-size: 11px;
+            color: #666;
+            font-family: sans-serif;
+            font-weight: normal;
+            direction: ltr;
+            margin-top: 2px;
+        }
+
+        .tabs-content::-webkit-scrollbar { width: 8px; }
+        .tabs-content::-webkit-scrollbar-track { background: #fefce8; }
+        .tabs-content::-webkit-scrollbar-thumb { background: #d1d5db; border-radius: 4px; }
+        .tabs-content::-webkit-scrollbar-thumb:hover { background: #9ca3af; }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(5px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @media (max-width: 1200px) {
+            .interactive-sentence { font-size: 2.8vw; }
+            .speaker-icon { font-size: 3vw; }
+            .bloom-image { width: 50px; left: 5px; }
+            .tabs-content { padding-left: 60px; }
+            .objective-box { min-width: auto; font-size: 14px; }
+        }
+
+        @media (max-width: 768px) {
+            .vocab-grid-3col { grid-template-columns: 1fr; gap: 10px;}
+            .vocab-grid-2col { grid-template-columns: 1fr; gap: 10px;}
+            .interactive-sentence { font-size: 4vw; }
+            .assembled-sentence { font-size: 3.5vw; }
+            .synonym-table { width: 100%; max-width: 300px; font-size: 1.2rem; }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="app-container">
+        
+        <header class="top-header">
+            <div class="right-group">
+                <div class="objective-container">
+                    <img src="lo.png" alt="Learning Objective" class="header-icon" onerror="this.src='https://via.placeholder.com/40x40?text=LO'">
+                    <div class="objective-box">
+                        <span class="obj-ar">أَنْ أُوَظِّفَ التَّرَاكِيبَ الْجَدِيدَةَ فِي جُمَلٍ تَامَّةٍ</span>
+                        <span class="obj-en">To use the new structures in complete sentences</span>
+                    </div>
+                </div>
+
+                <nav class="tabs-nav">
+                    <button class="tab-btn active" onclick="openTab('tab1', this)">
+                        <span class="tab-text-ar">التَّرْكِيبُ الْأَوَّلُ</span>
+                        <span class="tab-text-en">First Structure</span>
+                    </button>
+                    <button class="tab-btn" onclick="openTab('tab2', this)">
+                        <span class="tab-text-ar">التَّرْكِيبُ الثَّانِي</span>
+                        <span class="tab-text-en">Second Structure</span>
+                    </button>
+                </nav>
+            </div>
+
+            <div class="left-icons-container">
+                <img src="strit.png" alt="Strit" class="header-icon" onerror="this.src='https://via.placeholder.com/40x40?text=S'">
+                <img src="allwrite.png" alt="All Write" class="header-icon" onerror="this.src='https://via.placeholder.com/40x40?text=AW'">
+            </div>
+        </header>
+
+        <main class="tabs-content">
+            
+            <img src="bloom.png" class="bloom-image" alt="Bloom Taxonomy" onerror="this.src='https://via.placeholder.com/80x300?text=Bloom'">
+
+            <div id="tab1" class="tab-pane active">
+                <div class="interactive-sentence" title="اضغط للاستماع" onclick="playSentence('tab1')">
+                    <span class="speaker-icon">🔊</span>
+                    <span class="word-hover green-word" data-en="Usually">عَادَةً</span>
+                    <span class="word-hover target-word" data-en="[Time]">........</span>
+                    <span class="word-hover normal-word" data-en=",">،</span>
+                    <span class="word-hover normal-word" data-en="I go">أَذْهَبُ</span>
+                    <span class="word-hover normal-word" data-en="to">إِلَى</span>
+                    <span class="word-hover normal-word" data-en="the cinema">السِّينِمَا</span>
+                    <span class="word-hover normal-word" data-en="with">مَعَ</span>
+                    <span class="word-hover target-word" data-en="[Person]">.......</span>
+                    <span class="word-hover normal-word" data-en="to watch">لِنُشَاهِدَ</span>
+                    <span class="word-hover normal-word" data-en="the movies">الْأَفْلَامَ</span>
+                    <span class="word-hover target-word" data-en="[Adjective]">.............</span>
+                </div>
+                
+                <div class="vocab-grid-3col">
+                    <div class="vocab-col">
+                        <div class="vocab-card" onclick="playVocab(this)"><span class="vocab-ar">فِي وَقْتِ فَرَاغِي</span><span class="vocab-en">In my free time</span></div>
+                        <div class="vocab-card" onclick="playVocab(this)"><span class="vocab-ar">يَوْمَ السَّبْتِ</span><span class="vocab-en">On Saturday</span></div>
+                        <div class="vocab-card" onclick="playVocab(this)"><span class="vocab-ar">فِي الْعُطْلَةِ</span><span class="vocab-en">In the holiday</span></div>
+                        <div class="vocab-card" onclick="playVocab(this)"><span class="vocab-ar">فِي الْإِجَازَةِ الصَّيْفِيَّةِ</span><span class="vocab-en">In the summer vacation</span></div>
+                        <div class="vocab-card" onclick="playVocab(this)"><span class="vocab-ar">فِي نِهَايَةِ الْأُسْبُوعِ</span><span class="vocab-en">At the weekend</span></div>
+                    </div>
+                    <div class="vocab-col">
+                        <div class="vocab-card" onclick="playVocab(this)"><span class="vocab-ar">صَدِيقِي</span><span class="vocab-en">My friend</span></div>
+                        <div class="vocab-card" onclick="playVocab(this)"><span class="vocab-ar">أَصْدِقَائِي</span><span class="vocab-en">My friends</span></div>
+                        <div class="vocab-card" onclick="playVocab(this)"><span class="vocab-ar">أُسْرَتِي</span><span class="vocab-en">My family</span></div>
+                        <div class="vocab-card" onclick="playVocab(this)"><span class="vocab-ar">أَخِي</span><span class="vocab-en">My brother</span></div>
+                        <div class="vocab-card" onclick="playVocab(this)"><span class="vocab-ar">أُخْتِي</span><span class="vocab-en">My sister</span></div>
+                        <div class="vocab-card" onclick="playVocab(this)"><span class="vocab-ar">أَبِي</span><span class="vocab-en">My father</span></div>
+                        <div class="vocab-card" onclick="playVocab(this)"><span class="vocab-ar">أُمِّي</span><span class="vocab-en">My mother</span></div>
+                    </div>
+                    <div class="vocab-col">
+                        <div class="vocab-card" onclick="playVocab(this)"><span class="vocab-ar">الْمُثِيرَةَ</span><span class="vocab-en">Exciting</span></div>
+                        <div class="vocab-card" onclick="playVocab(this)"><span class="vocab-ar">الْجَدِيدَةَ</span><span class="vocab-en">New</span></div>
+                        <div class="vocab-card" onclick="playVocab(this)"><span class="vocab-ar">الْمُضْحِكَةَ</span><span class="vocab-en">Funny</span></div>
+                        <div class="vocab-card" onclick="playVocab(this)"><span class="vocab-ar">الْمُشَوِّقَةَ</span><span class="vocab-en">Thrilling</span></div>
+                    </div>
+                </div>
+
+                <div class="assembled-sentence">
+                    <span class="green-word">عَادَةً</span> <span class="blue-word">يَوْمَ السَّبْتِ</span>، أَذْهَبُ إِلَى السِّينِمَا مَعَ <span class="blue-word">أُسْرَتِي</span> لِنُشَاهِدَ الْأَفْلَامَ <span class="blue-word">الْجَدِيدَةَ</span>.
+                </div>
+            </div>
+
+            <div id="tab2" class="tab-pane">
+                
+                <div class="interactive-sentence" title="اضغط للاستماع" onclick="playSentence('tab2')">
+                    <span class="speaker-icon">🔊</span>
+                    <span class="word-hover normal-word" data-en="I">أَنَا</span>
+                    <span class="word-hover normal-word" data-en="like">أُحِبُّ</span>
+                    <span class="word-hover normal-word" data-en="movies">أَفْلَامَ</span>
+                    <span class="word-hover target-word" data-en="[Type]">...........</span>
+                    <span class="word-hover red-word" data-en="because it is">لِأَنَّهَا</span>
+                    <span class="word-hover target-word" data-en="[Adjective]">.........</span>
+                </div>
+                
+                <div class="vocab-grid-2col">
+                    <div class="vocab-col">
+                        <div class="vocab-card" onclick="playVocab(this)"><span class="vocab-ar">الْكُومِيدْيَا</span><span class="vocab-en">Comedy</span></div>
+                        <div class="vocab-card" onclick="playVocab(this)"><span class="vocab-ar">الْحَرَكَةِ</span><span class="vocab-en">Action</span></div>
+                        <div class="vocab-card" onclick="playVocab(this)"><span class="vocab-ar">الرُّعْبِ</span><span class="vocab-en">Horror</span></div>
+                        <div class="vocab-card" onclick="playVocab(this)"><span class="vocab-ar">الْخَيَالِ الْعِلْمِيِّ</span><span class="vocab-en">Science fiction</span></div>
+                        <div class="vocab-card" onclick="playVocab(this)"><span class="vocab-ar">الرُّومَانْسِيَّةِ</span><span class="vocab-en">Romantic</span></div>
+                    </div>
+                    <div class="vocab-col">
+                        <div class="vocab-card" onclick="playVocab(this)"><span class="vocab-ar">مَلِيئَةٌ بِالْإِثَارَةِ وَالتَّشْوِيقِ</span><span class="vocab-en">Full of excitement and thrill</span></div>
+                        <div class="vocab-card" onclick="playVocab(this)"><span class="vocab-ar">مُمْتِعَةٌ</span><span class="vocab-en">Fun</span></div>
+                        <div class="vocab-card" onclick="playVocab(this)"><span class="vocab-ar">مُسَلِّيَةٌ</span><span class="vocab-en">Entertaining</span></div>
+                        <div class="vocab-card" onclick="playVocab(this)"><span class="vocab-ar">مُثِيرَةٌ</span><span class="vocab-en">Exciting</span></div>
+                        <div class="vocab-card" onclick="playVocab(this)"><span class="vocab-ar">مُضْحِكَةٌ</span><span class="vocab-en">Funny</span></div>
+                        <div class="vocab-card" onclick="playVocab(this)"><span class="vocab-ar">شَيِّقَةٌ</span><span class="vocab-en">Interesting</span></div>
+                        <div class="vocab-card" onclick="playVocab(this)"><span class="vocab-ar">رَائِعَةٌ</span><span class="vocab-en">Wonderful</span></div>
+                    </div>
+                </div>
+
+                <div class="assembled-sentence">
+                    أَنَا أُحِبُّ أَفْلَامَ <span class="blue-word">الْحَرَكَةِ</span> <span class="red-word">لِأَنَّهَا</span> <span class="blue-word">مَلِيئَةٌ بِالْإِثَارَةِ وَالتَّشْوِيقِ</span>.
+                </div>
+            </div>
+
+        </main>
+    </div>
+
+    <script>
+        function openTab(tabId, btnElement) {
+            document.querySelectorAll('.tab-pane').forEach(pane => pane.classList.remove('active'));
+            document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+            document.getElementById(tabId).classList.add('active');
+            btnElement.classList.add('active');
+            
+            if ('speechSynthesis' in window) {
+                window.speechSynthesis.cancel();
+                document.querySelectorAll('.reading-highlight').forEach(el => el.classList.remove('reading-highlight'));
+            }
+        }
+
+        function playSentence(tabId) {
+            if (!('speechSynthesis' in window)) {
+                alert("عذراً، متصفحك لا يدعم خاصية النطق الصوتي.");
+                return;
+            }
+
+            const tab = document.getElementById(tabId);
+            window.speechSynthesis.cancel(); 
+            
+            document.querySelectorAll('.reading-highlight').forEach(el => el.classList.remove('reading-highlight'));
+
+            const elements = Array.from(tab.querySelectorAll('.interactive-sentence > span'));
+            // جلب الأعمدة الموجودة في هذا التبويب
+            const columns = tab.querySelectorAll('.vocab-col');
+            
+            let textToSpeak = "";
+            let wordMap = [];
+            let blankCounter = 0;
+
+            elements.forEach(el => {
+                let text = el.innerText.trim();
+                if (!text || el.classList.contains('speaker-icon')) return;
+
+                if (/^\d+\s*-?$/.test(text)) return;
+                
+                let highlightTarget = el;
+                let speakWord = text.replace(/[\u0640]/g, '');
+
+                if (text === '/') {
+                    speakWord = "أَوْ";
+                } else if (text.includes('...')) {
+                    // ربط الفراغ بالعمود المناسب (الفراغ الأول للعمود الأول، إلخ)
+                    if (columns.length > 0) {
+                        const targetColumn = columns[blankCounter % columns.length];
+                        const cardsInColumn = targetColumn.querySelectorAll('.vocab-card');
+                        
+                        if (cardsInColumn.length > 0) {
+                            // اختيار بطاقة عشوائية من هذا العمود لجعل الجملة متجددة في كل مرة!
+                            const randomIdx = Math.floor(Math.random() * cardsInColumn.length);
+                            const card = cardsInColumn[randomIdx];
+                            
+                            speakWord = card.querySelector('.vocab-ar').textContent.replace(/[\u0640]/g, '');
+                            highlightTarget = card;
+                        }
+                    }
+                    blankCounter++;
+                }
+
+                if (speakWord) {
+                    let start = textToSpeak.length;
+                    textToSpeak += speakWord + " ";
+                    let end = textToSpeak.length - 1;
+                    wordMap.push({ start, end, element: highlightTarget });
+                }
+            });
+
+            const utterance = new SpeechSynthesisUtterance(textToSpeak);
+            utterance.lang = 'ar-SA';
+            utterance.rate = 0.85; 
+
+            utterance.onboundary = (e) => {
+                if (e.name === 'word') {
+                    document.querySelectorAll('.reading-highlight').forEach(el => el.classList.remove('reading-highlight'));
+                    
+                    const match = wordMap.find(m => e.charIndex >= m.start && e.charIndex <= m.end + 1);
+                    if (match && match.element) {
+                        match.element.classList.add('reading-highlight');
+                    }
+                }
+            };
+
+            utterance.onend = () => document.querySelectorAll('.reading-highlight').forEach(el => el.classList.remove('reading-highlight'));
+            utterance.onerror = () => document.querySelectorAll('.reading-highlight').forEach(el => el.classList.remove('reading-highlight'));
+
+            window.speechSynthesis.speak(utterance);
+        }
+
+        function playVocab(cardElement) {
+            event.stopPropagation();
+
+            if (!('speechSynthesis' in window)) return;
+            window.speechSynthesis.cancel();
+
+            document.querySelectorAll('.reading-highlight').forEach(el => el.classList.remove('reading-highlight'));
+            
+            cardElement.classList.add('reading-highlight');
+
+            let text = cardElement.querySelector('.vocab-ar').textContent.trim();
+            
+            let utterance = new SpeechSynthesisUtterance(text);
+            utterance.lang = 'ar-SA';
+            utterance.rate = 0.85;
+
+            utterance.onend = () => cardElement.classList.remove('reading-highlight');
+            utterance.onerror = () => cardElement.classList.remove('reading-highlight');
+
+            window.speechSynthesis.speak(utterance);
+        }
+    </script>
+</body>
+</html>

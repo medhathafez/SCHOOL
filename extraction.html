@@ -1,0 +1,518 @@
+<!DOCTYPE html>
+<html lang="ar" translate="no">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="google" content="notranslate">
+    <title>استخرج من النص</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Simplified Arabic', Tahoma, sans-serif; }
+        
+        body {
+            background-color: #f3f4f6; 
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            padding: 1vh 1vw; 
+            overflow-y: auto; 
+            overflow-x: hidden;
+        }
+
+        .app-container {
+            display: flex;
+            flex-direction: row;
+            width: 100%;
+            max-width: 1400px;
+            background: white;
+            border-radius: 12px; 
+            box-shadow: 0 5px 20px rgba(0,0,0,0.08);
+            height: auto; 
+            min-height: 98vh;
+            position: relative;
+        }
+
+        .sidebar {
+            width: 300px;
+            background-color: #ffffff;
+            padding: 10px 15px; 
+            display: flex;
+            flex-direction: column;
+            border-right: 1px solid #e5e7eb; 
+            direction: ltr;
+        }
+
+        .score-stamp {
+            display: none;
+            color: #ef4444;
+            font-size: 24px;
+            font-weight: 900;
+            text-align: center;
+            border: 4px dashed #ef4444;
+            padding: 10px;
+            border-radius: 12px;
+            margin-bottom: 10px;
+            transform: rotate(-5deg);
+            background-color: #fef2f2;
+            line-height: 1.3;
+        }
+
+        .title-container { text-align: right; margin-bottom: 5px; direction: rtl; }
+        .title {
+            color: #000000;
+            font-size: 22px; 
+            font-weight: bold;
+            position: relative;
+            display: inline-block;
+            padding-bottom: 5px;
+        }
+        .title::after { content: ''; position: absolute; bottom: 0; right: 0; width: 100%; height: 3px; background-color: #eab308; }
+        
+        .instruction { 
+            font-size: 13px; 
+            color: #4b5563; 
+            margin-bottom: 10px; 
+            text-align: left; 
+            direction: ltr; 
+            line-height: 1.3;
+        }
+        
+        .categories-list { display: flex; flex-direction: column; gap: 5px; direction: rtl; flex-grow: 1; } 
+        
+        .category-btn {
+            display: flex; align-items: center; justify-content: flex-start; 
+            padding: 6px 10px; 
+            background-color: #ffffff;
+            border: 2px solid #f3f4f6;
+            border-radius: 8px;
+            cursor: pointer; transition: all 0.3s ease; position: relative;
+        }
+        .category-btn:hover { background-color: #f9fafb; }
+
+        .category-btn.active {
+            border-style: solid;
+            box-shadow: inset 0 0 0 2px rgba(0,0,0,0.05);
+        }
+
+        .category-btn::after {
+            content: attr(data-en);
+            position: absolute;
+            bottom: 100%; 
+            left: 50%;
+            transform: translateX(-50%);
+            margin-bottom: 6px;
+            background: #1f2937;
+            color: #ffffff;
+            padding: 4px 8px;
+            border-radius: 6px;
+            font-size: 13px;
+            white-space: nowrap;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.2s ease;
+            z-index: 50;
+            font-family: Tahoma, sans-serif;
+        }
+        .category-btn::before {
+            content: '';
+            position: absolute;
+            bottom: 100%;
+            left: 50%;
+            transform: translateX(-50%);
+            margin-bottom: 0px;
+            border-width: 6px;
+            border-style: solid;
+            border-color: #1f2937 transparent transparent transparent;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.2s ease;
+            z-index: 50;
+        }
+        .category-btn:hover::after, .category-btn:hover::before { opacity: 1; }
+        
+        .dot { width: 14px; height: 14px; border-radius: 50%; display: inline-block; margin-left: 10px; flex-shrink: 0; }
+        
+        .cat-text-container { 
+            display: flex; 
+            flex-direction: column; 
+            justify-content: center; 
+            align-items: flex-start; 
+            width: 100%; 
+            overflow: hidden;
+        }
+        
+        .cat-label-container {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .cat-label { 
+            font-size: 18px; 
+            color: #000000;
+            font-weight: bold; 
+            white-space: nowrap; 
+        } 
+        
+        .cat-status { 
+            font-size: 14px; 
+            font-weight: bold;
+            display: none; 
+            white-space: nowrap;
+        }
+
+        .submit-btn {
+            margin-top: 10px;
+            width: 100%;
+            padding: 10px;
+            background-color: #3b82f6;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 20px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+        .submit-btn:hover { background-color: #2563eb; }
+
+        .text-area {
+            flex-grow: 1; 
+            background-color: #fefce8; 
+            padding: 20px 3vw; 
+            direction: rtl;
+        }
+
+        .reading-text {
+            font-size: 28px; 
+            line-height: 2; 
+            color: #000000;
+            text-align: justify;
+            font-weight: bold; 
+        }
+
+        .word {
+            cursor: pointer; padding: 0px 4px; border-radius: 6px; transition: all 0.3s ease;
+            border-bottom: 3px solid transparent; display: inline-block;
+        }
+        .word:hover { background-color: rgba(0,0,0,0.05); }
+
+        @media (max-width: 900px) {
+            .app-container { flex-direction: column-reverse; height: auto; }
+            .sidebar { width: 100%; border-right: none; border-top: 1px solid #e5e7eb; }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="app-container" id="capture-area">
+        <aside class="sidebar">
+            <div class="score-stamp" id="score-stamp">
+                <div id="stamp-score"></div>
+            </div>
+            <div class="title-container">
+                <h2 class="title">
+                    اسْتَخْرِج مِن النَّصِّ
+                    <span style="display: block; font-size: 14px; font-weight: normal; color: #6b7280; font-family: Tahoma, sans-serif; margin-top: 4px; line-height: 1;">Extract from the text</span>
+                </h2>
+            </div>
+            <p class="instruction">Click an item to hear it & select 1 matching word in the text. Click Submit when done.</p>
+            
+            <div class="categories-list" id="categories-container"></div>
+            
+            <button class="submit-btn" id="submit-btn" onclick="submitQuiz()">Submit</button>
+        </aside>
+
+        <main class="text-area">
+            <div id="text-container" class="reading-text"></div>
+        </main>
+    </div>
+
+    <script>
+        let categories = [
+            { id: 'c1', label: 'فِعْلًا مُضَارِعًا', en: 'Present tense verb', color: '#3b82f6' },
+            { id: 'c2', label: 'فِعْلًا مَاضِيًا', en: 'Past tense verb', color: '#22c55e' },
+            { id: 'c3', label: 'أُسْلُوبَ تَمَنِّي', en: 'Wishing style', color: '#f59e0b' },
+            { id: 'c4', label: 'أُسْلُوبَ نَفْيٍ', en: 'Negative style', color: '#8b5cf6' },
+            { id: 'c5', label: 'مُرَادِفَ (جِدًّا)', en: 'Synonym', color: '#06b6d4' },
+            { id: 'c6', label: 'مُرَادِفَ (لِلْأَسَفِ)', en: 'Synonym', color: '#ef4444' }, 
+            { id: 'c7', label: 'ضِدَّ (فازَ)', en: 'Antonym', color: '#ec4899' },
+            { id: 'c8', label: 'مُفْرَدَ (مُسَابَقَاتٍ)', en: 'Singular', color: '#14b8a6' },
+            { id: 'c9', label: 'مُفْرَدَ (المِيدَالِيَاتِ)', en: 'Singular', color: '#84cc16' }
+        ];
+
+        function shuffleArray(array) {
+            for (let i = array.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                let temp = array[i];
+                array[i] = array[j];
+                array[j] = temp;
+            }
+        }
+        shuffleArray(categories);
+
+        const rawAnswers = {
+            'c1': ['يَحْصُلْ', 'يَتَدَرَّبْ', 'أَرْجُو', 'أُشَارِكَ'],
+            'c2': ['أَقَامَتْ', 'كَانَ', 'وَكَانَ', 'شَارَكْتُ', 'فُزْتُ', 'وَفُزْتُ', 'حَصَلْتُ', 'خَسِرَ'],
+            'c3': ['أَرْجُو أَنْ أُشَارِكَ مَرَّةً أُخْرَى العَامَ القَادِمَ'], 
+            'c4': ['وَلَمْ يَحْصُلْ عَلَى أَيِّ مِيدَالِيَّةٍ', 'لَمْ يَحْصُلْ عَلَى أَيِّ مِيدَالِيَّةٍ'], 
+            'c5': ['لِلْغَايَةِ'],
+            'c6': ['لِسُوءِ الحَظِّ'], 
+            'c7': ['خَسِرَ'],
+            'c8': ['مُسَابَقَةِ', 'المُسَابَقَةِ'],
+            'c9': ['المِيدَالِيَّةِ', 'مِيدَالِيَّةٍ']
+        };
+
+        function normalizeArabic(text) {
+            return text.split(/\s+/).map(word => {
+                let w = word.replace(/[\u064B-\u065F\u0640]/g, "") 
+                           .replace(/[أإآٱ]/g, "ا") 
+                           .replace(/ة/g, "ه") 
+                           .replace(/[يى]/g, "ي") 
+                           .replace(/[،.؛؟!"'-]/g, "");
+                
+                if (w.length > 3 && w.startsWith("ال")) w = w.substring(2);
+                else if (w.length > 4 && (w.startsWith("وال") || w.startsWith("فال") || w.startsWith("كال") || w.startsWith("بال"))) w = w.charAt(0) + w.substring(3);
+                else if (w.length > 3 && w.startsWith("لل")) w = "ل" + w.substring(2);
+                return w;
+            }).join(" ").trim();
+        }
+
+        const correctAnswers = {};
+        for (let catId in rawAnswers) correctAnswers[catId] = rawAnswers[catId].map(normalizeArabic);
+
+        let rawText = `جَدِيرٌ بِالذِّكْرِ أَنَّ الشَّهْرَ المَاضِي أَقَامَتْ مَدْرَسَةُ كُلِّيَّةِ جُمِيرَا اليَوْمَ الرِّيَاضِيَّ فِي المَدِينَةِ الرِّيَاضِيَّةِ فِي دُبَي، وَكَانَ يَوْمًا رَائِعًا وَمُمْتِعًا لِلْغَايَةِ. <br><br> وَمِنَ المُدْهِشِ أَنَّنِي شَارَكْتُ فِي مُسَابَقَةِ الجَرْيِ، وَفُزْتُ بِالمَرْكَزِ الأَوَّلِ، كَمَا أَنَّنِي حَصَلْتُ عَلَى المِيدَالِيَّةِ الذَّهَبِيَّةِ، لَكِنَّ لِسُوءِ الحَظِّ خَسِرَ صَدِيقِي فِي المُسَابَقَةِ وَلَمْ يَحْصُلْ عَلَى أَيِّ مِيدَالِيَّةٍ؛ لِأَنَّهُ لَمْ يَتَدَرَّبْ جَيِّدًا. أَرْجُو أَنْ أُشَارِكَ مَرَّةً أُخْرَى العَامَ القَادِمَ. فِي رَأْيِي، اليَوْمُ الرِّيَاضِيُّ أَمْتَعُ مِنَ اليَوْمِ الدِّرَاسِيِّ.`;
+
+        // إزالة خاصية الدمج وجعل كل كلمة في النص فردية ومستقلة تماماً
+        let processedHTML = rawText.replace(/([\u0600-\u06FF]+)/g, '<span class="word">$1</span>');
+
+        const textContainer = document.getElementById('text-container');
+        textContainer.innerHTML = processedHTML;
+
+        function hexToRgba(hex, alpha) {
+            let r = parseInt(hex.slice(1, 3), 16), g = parseInt(hex.slice(3, 5), 16), b = parseInt(hex.slice(5, 7), 16);
+            return `rgba(${r}, ${g}, ${b}, ${alpha})`;
+        }
+
+        const categoriesContainer = document.getElementById('categories-container');
+        let activeCategoryId = null;
+        let activeColor = null;
+        let userSelections = {}; // يخزن مصفوفة من العناصر (الكلمات) لكل تصنيف
+        let phraseSpanGroups = []; // لحفظ الكلمات التي تشكل الجمل المطلوبة
+
+        // إعداد مجموعات الجمل المخفية لتسهيل اختيار الجملة كاملة بضغطة واحدة
+        let allWordSpans = Array.from(document.querySelectorAll('.word'));
+        let spanWords = allWordSpans.map(s => normalizeArabic(s.textContent));
+
+        Object.keys(correctAnswers).forEach(catId => {
+            correctAnswers[catId].forEach(ans => {
+                let normAnsWords = ans.split(' ');
+                if (normAnsWords.length > 1) { // إذا كانت الإجابة جملة وليست كلمة واحدة
+                    let len = normAnsWords.length;
+                    for (let i = 0; i <= spanWords.length - len; i++) {
+                        let match = true;
+                        for (let j = 0; j < len; j++) {
+                            if (spanWords[i+j] !== normAnsWords[j]) {
+                                match = false; break;
+                            }
+                        }
+                        if (match) {
+                            let group = [];
+                            for(let j = 0; j < len; j++) group.push(allWordSpans[i+j]);
+                            phraseSpanGroups.push({ catId: catId, spans: group });
+                        }
+                    }
+                }
+            });
+        });
+
+        function playCategoryAudio(text) {
+            if ('speechSynthesis' in window) {
+                window.speechSynthesis.cancel();
+                let cleanText = text.replace(/\(.*?\)/g, '').trim(); 
+                let msg = new SpeechSynthesisUtterance(cleanText);
+                msg.lang = 'ar-SA';
+                window.speechSynthesis.speak(msg);
+            }
+        }
+
+        categories.forEach(cat => {
+            const btn = document.createElement('div');
+            btn.className = 'category-btn';
+            btn.id = `btn-${cat.id}`;
+            btn.dataset.en = cat.en; 
+            
+            btn.onclick = () => {
+                playCategoryAudio(cat.label);
+                selectCategory(cat.id, cat.color, btn);
+            };
+
+            btn.innerHTML = `
+                <span class="dot" style="background-color: ${cat.color};"></span>
+                <div class="cat-text-container">
+                    <div class="cat-label-container">
+                        <span class="cat-label">${cat.label}</span>
+                        <span class="cat-status" id="status-${cat.id}"></span>
+                    </div>
+                </div>
+            `;
+            categoriesContainer.appendChild(btn);
+        });
+
+        function selectCategory(id, color, btnElement) {
+            Array.from(document.querySelectorAll('.category-btn')).forEach(b => {
+                b.classList.remove('active');
+                b.style.backgroundColor = "#ffffff";
+                b.style.borderColor = "#f3f4f6";
+            });
+
+            btnElement.classList.add('active');
+            btnElement.style.backgroundColor = hexToRgba(color, 0.3);
+            btnElement.style.borderColor = color;
+
+            activeCategoryId = id;
+            activeColor = color;
+        }
+
+        // دالة مسؤولة عن تلوين الكلمات بناءً على الاختيارات
+        function updateSpanColors() {
+            // إزالة الألوان من جميع الكلمات أولاً
+            allWordSpans.forEach(s => {
+                s.style.backgroundColor = "";
+                s.style.borderBottomColor = "transparent";
+            });
+
+            // ترتيب الفئات لتلوين الجمل الكبيرة أولاً ثم الكلمات الفردية فوقها
+            let activeCats = categories.filter(cat => userSelections[cat.id]);
+            activeCats.sort((a, b) => userSelections[b.id].length - userSelections[a.id].length);
+
+            activeCats.forEach(cat => {
+                userSelections[cat.id].forEach(span => {
+                    span.style.backgroundColor = hexToRgba(cat.color, 0.3);
+                    span.style.borderBottomColor = cat.color;
+                });
+            });
+        }
+
+        allWordSpans.forEach(span => {
+            span.onclick = function() {
+                if (!activeCategoryId) {
+                    alert("الرجاء الضغط على المطلوب من القائمة الجانبية أولاً.");
+                    return;
+                }
+                
+                let isPhraseCategory = correctAnswers[activeCategoryId].some(ans => ans.includes(' '));
+                let selectedSpans = [this]; // الافتراضي: اختيار الكلمة التي تم الضغط عليها فقط
+
+                // إذا كان المطلوب هو جملة (مثل النفي أو التمني) وتم الضغط على أي كلمة من كلماتها، تتظلل كلها
+                if (isPhraseCategory) {
+                    let possibleGroups = phraseSpanGroups.filter(g => g.catId === activeCategoryId && g.spans.includes(this));
+                    if (possibleGroups.length > 0) {
+                        possibleGroups.sort((a,b) => b.spans.length - a.spans.length); // اختيار أطول تطابق للجملة
+                        selectedSpans = possibleGroups[0].spans;
+                    }
+                }
+
+                userSelections[activeCategoryId] = selectedSpans;
+                
+                let statusEl = document.getElementById(`status-${activeCategoryId}`);
+                statusEl.innerText = " (تم الاختيار)";
+                statusEl.style.color = "#3b82f6";
+                statusEl.style.display = 'inline-block';
+
+                updateSpanColors();
+            };
+        });
+
+        function revealAllAnswers() {
+            allWordSpans.forEach(s => {
+                s.style.backgroundColor = "";
+                s.style.borderBottom = "3px solid transparent";
+            });
+
+            let cats = categories.slice();
+            cats.forEach(cat => {
+                let isPhrase = correctAnswers[cat.id].some(ans => ans.includes(' '));
+                if (isPhrase) {
+                    let group = phraseSpanGroups.find(g => g.catId === cat.id);
+                    if (group) {
+                        group.spans.forEach(span => {
+                            span.style.borderBottom = `3px dashed ${cat.color}`;
+                            span.style.backgroundColor = hexToRgba(cat.color, 0.15);
+                        });
+                    }
+                } else {
+                    allWordSpans.forEach(span => {
+                        let cleanWord = normalizeArabic(span.textContent);
+                        if (correctAnswers[cat.id].includes(cleanWord)) {
+                            span.style.borderBottom = `3px dashed ${cat.color}`;
+                            span.style.backgroundColor = hexToRgba(cat.color, 0.15);
+                        }
+                    });
+                }
+            });
+        }
+
+        function submitQuiz() {
+            let score = 0;
+            let total = categories.length;
+            
+            categories.forEach(cat => {
+                let statusEl = document.getElementById(`status-${cat.id}`);
+                let selectedSpans = userSelections[cat.id];
+                
+                if (selectedSpans && selectedSpans.length > 0) {
+                    // دمج الكلمات المحددة للتحقق منها
+                    let cleanCombinedWord = selectedSpans.map(s => normalizeArabic(s.textContent)).join(" ");
+                    if (correctAnswers[cat.id].includes(cleanCombinedWord)) {
+                        score++;
+                        statusEl.innerText = ' ✔ صحيح';
+                        statusEl.style.color = '#10b981';
+                    } else {
+                        statusEl.innerText = ' ✘ خطأ';
+                        statusEl.style.color = '#ef4444';
+                    }
+                } else {
+                    statusEl.innerText = ' ✘ لم يُجب';
+                    statusEl.style.color = '#ef4444';
+                }
+                statusEl.style.display = 'inline-block';
+            });
+
+            let stamp = document.getElementById('score-stamp');
+            document.getElementById('stamp-score').innerText = `You got ${score}/${total}!`;
+            stamp.style.display = 'block';
+
+            document.getElementById('submit-btn').style.display = 'none';
+
+            setTimeout(() => {
+                let targetElement = document.body;
+                try {
+                    if (window.parent && window.parent.document && window.parent.document.body) {
+                        targetElement = window.parent.document.body;
+                    }
+                } catch(e) {
+                    console.log("CORS prevented capturing parent iframe. Capturing current frame instead.");
+                }
+
+                if (typeof html2canvas !== 'undefined') {
+                    html2canvas(targetElement, { scale: 2 }).then(canvas => {
+                        let link = document.createElement('a');
+                        link.download = `Result.png`;
+                        link.href = canvas.toDataURL('image/png');
+                        link.click();
+                        revealAllAnswers();
+                    }).catch(err => {
+                        console.error("Error generating image:", err);
+                        revealAllAnswers();
+                    });
+                } else {
+                    console.warn("html2canvas library not loaded.");
+                    revealAllAnswers();
+                }
+            }, 600);
+        }
+    </script>
+</body>
+</html>

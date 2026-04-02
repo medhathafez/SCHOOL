@@ -1,0 +1,597 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>الأنشطة التفاعلية</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            font-family: 'Simplified Arabic', Tahoma, Arial, sans-serif;
+            min-height: 100vh;
+            width: 100vw;
+            background: linear-gradient(135deg, #a18cd1 0%, #fbc2eb 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow-x: hidden;
+            padding: 10px;
+        }
+
+        /* نظام الصفحات المتعددة */
+        .page-view {
+            display: none;
+            width: 100%;
+            height: 100%;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+        }
+
+        .page-view.active {
+            display: flex;
+            animation: fadeIn 0.4s ease-in-out;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* ================= تصميم القائمة الرئيسية ================= */
+        .home-container {
+            width: 95vw;
+            max-width: 800px;
+            text-align: center;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 80vh;
+        }
+
+        .cards-grid {
+            display: flex;
+            gap: 20px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .course-card {
+            background: #fff;
+            border-radius: 20px;
+            padding: 40px 20px;
+            width: 280px;
+            cursor: pointer;
+            box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+            border: 3px solid transparent;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        .course-card:hover, .course-card:active {
+            transform: translateY(-10px);
+            box-shadow: 0 15px 30px rgba(0,0,0,0.2);
+            border-color: #fff;
+        }
+
+        .card-pronouns { background: linear-gradient(135deg, #FF9A9E 0%, #FECFEF 100%); }
+        .card-pronouns .card-icon { font-size: 4rem; margin-bottom: 15px; }
+        
+        .card-past { background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%); }
+        .card-past .card-icon { font-size: 4rem; margin-bottom: 15px; }
+
+        .card-title {
+            color: #fff;
+            font-size: 1.8rem;
+            font-weight: bold;
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.2);
+            min-height: 60px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        /* إعدادات التبديل للبطاقات والتابات والنصوص (عربي/إنجليزي) */
+        .en-text { display: none; font-family: Arial, sans-serif; direction: ltr; }
+        
+        /* تأثير التبديل عند التمرير */
+        .course-card:hover .ar-text, .course-card:active .ar-text { display: none; }
+        .course-card:hover .en-text, .course-card:active .en-text { display: block; animation: fadeIn 0.3s ease-in-out; }
+
+        .tab-btn:hover .ar-text, .tab-btn:active .ar-text { display: none; }
+        .tab-btn:hover .en-text, .tab-btn:active .en-text { display: block; animation: fadeIn 0.3s ease-in-out; }
+
+        /* تأثير التبديل لعناوين الأسئلة */
+        .instruction-title { 
+            text-align: center; color: #F5576C; font-weight: bold; margin-bottom: 15px; 
+            cursor: pointer; -webkit-tap-highlight-color: transparent;
+        }
+        .blue-theme .instruction-title { color: #4facfe; }
+        .instruction-title .ar-title { font-size: clamp(1.4rem, 4.5vw, 1.8rem); line-height: 1.2; }
+        .instruction-title:hover .ar-text, .instruction-title:active .ar-text { display: none; }
+        .instruction-title:hover .en-text, .instruction-title:active .en-text { display: block; animation: fadeIn 0.3s ease-in-out; font-size: clamp(1.1rem, 3.5vw, 1.4rem); margin-top: 5px; color: #555; }
+
+        /* صندوق المعلومات التوضيحي (للشرح) */
+        .info-box {
+            background: #e1f5fe; border: 2px solid #81d4fa; border-radius: 10px; padding: 12px; margin-bottom: 15px;
+            cursor: pointer; -webkit-tap-highlight-color: transparent; text-align: center; transition: 0.3s;
+        }
+        .info-box:hover { background: #b3e5fc; }
+        .info-box:hover .ar-text, .info-box:active .ar-text { display: none; }
+        .info-box:hover .en-text, .info-box:active .en-text { display: block; animation: fadeIn 0.3s ease-in-out; }
+        .info-box .ar-text { font-size: clamp(1.1rem, 3.5vw, 1.4rem); color: #0277BD; font-weight: bold; line-height: 1.5; }
+        .info-box .en-text { font-family: Arial, sans-serif; font-size: clamp(0.9rem, 3vw, 1.1rem); color: #0277BD; font-weight: bold; direction: ltr; display: none; line-height: 1.5; }
+
+        /* زر الرجوع */
+        .btn-back {
+            background: #fff; color: #555; border: none; padding: 8px 15px; border-radius: 8px;
+            font-family: Arial, sans-serif; font-size: 1.1rem; font-weight: bold; cursor: pointer;
+            margin-bottom: 10px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); align-self: flex-start;
+            display: flex; align-items: center; gap: 5px; transition: 0.2s; direction: ltr;
+        }
+        .btn-back:hover { background: #f0f0f0; transform: scale(1.05); }
+
+        /* ================= تصميم حاوية الأنشطة (المشتركة) ================= */
+        .activity-container {
+            width: 98vw; max-width: 1000px; min-height: 90vh; background: #ffffff;
+            border-radius: 15px; box-shadow: 0 10px 30px rgba(0,0,0,0.15); display: flex;
+            flex-direction: column; overflow: hidden; border: 2px solid #fff; padding-bottom: 10px;
+        }
+
+        .main-header { text-align: center; padding: 15px 10px; background: #fff; color: #F5576C; border-bottom: 1px solid #eee; }
+        .main-header.blue-theme { color: #4facfe; } 
+        .main-header .ar-title { font-size: clamp(1.6rem, 5vw, 2.2rem); font-weight: bold; line-height: 1.2; }
+        .main-header .en-title { font-family: Arial, sans-serif; font-size: clamp(0.8rem, 2.5vw, 1rem); color: #666; direction: ltr; margin-top: 5px; }
+
+        .tabs { display: flex; background: #e9ecef; border-radius: 12px; margin: 15px; padding: 6px; gap: 5px; box-shadow: inset 0 2px 5px rgba(0,0,0,0.05); }
+        .tab-btn { flex: 1; font-family: inherit; font-size: clamp(1rem, 3vw, 1.4rem); font-weight: bold; color: #555; background: transparent; border: none; padding: 8px 4px; border-radius: 8px; cursor: pointer; transition: all 0.3s ease; min-height: 50px;}
+        .tab-btn.active { color: #fff; background: linear-gradient(to right, #F5576C, #F093FB); box-shadow: 0 4px 10px rgba(245, 87, 108, 0.3); }
+        .blue-theme .tab-btn.active { background: linear-gradient(to right, #4facfe, #00f2fe); box-shadow: 0 4px 10px rgba(79, 172, 254, 0.3); }
+
+        @keyframes glowingBlinkRed { 0% { box-shadow: 0 0 5px rgba(245, 87, 108, 0.1); color: #555; } 100% { box-shadow: 0 0 15px #F5576C, 0 0 25px #F093FB; color: #F5576C; background-color: rgba(245, 87, 108, 0.1); } }
+        @keyframes glowingBlinkBlue { 0% { box-shadow: 0 0 5px rgba(79, 172, 254, 0.1); color: #555; } 100% { box-shadow: 0 0 15px #4facfe, 0 0 25px #00f2fe; color: #4facfe; background-color: rgba(79, 172, 254, 0.1); } }
+        
+        #pronounsPage .tab-activity:not(.active) { animation: glowingBlinkRed 0.8s infinite alternate ease-in-out; }
+        #pastTensePage .tab-activity:not(.active) { animation: glowingBlinkBlue 0.8s infinite alternate ease-in-out; }
+
+        .tab-content { flex: 1; display: none; flex-direction: column; padding: 0 15px 15px 15px; overflow-y: auto; }
+        .tab-content.active { display: flex; }
+
+        /* ================= تنسيقات مشتركة للنصوص والأنشطة ================= */
+        .line-group { margin-bottom: 8px; }
+        .ar-line { font-size: clamp(1.1rem, 3.5vw, 1.4rem); color: #222; font-weight: bold; }
+        .en-line { font-family: Arial, sans-serif; font-size: clamp(0.7rem, 2.5vw, 0.85rem); color: #666; direction: ltr; text-align: left; margin-top: -2px; }
+
+        .question-card { background: #fdfbfb; padding: 10px 15px; border-radius: 10px; border: 1px solid #eee; margin-bottom: 10px; }
+        .question-card p { font-size: clamp(1.2rem, 4vw, 1.5rem); margin-bottom: 8px; color: #222; font-weight: bold; line-height: 1.6;}
+        .question-card input { width: 100%; font-family: inherit; font-size: clamp(1.1rem, 4vw, 1.4rem); padding: 8px; border: 2px solid #ccc; border-radius: 8px; outline: none; }
+        .question-card input:focus { border-color: #F093FB; }
+        .blue-theme .question-card input:focus { border-color: #4facfe; }
+        .feedback { display: block; margin-top: 5px; font-size: clamp(1rem, 3.5vw, 1.2rem); font-weight: bold; min-height: 1.2em; }
+        .wrong-word { text-decoration: underline; text-decoration-color: #dc3545; text-decoration-thickness: 3px; font-weight: 900; }
+        
+        /* تظليل الكلمات الخاطئة */
+        mark { background-color: #ffcccc; padding: 0 4px; border-radius: 4px; color: #d32f2f; font-weight: bold; }
+
+        .btn-check { color: white; border: none; padding: 10px; font-size: clamp(1.2rem, 4vw, 1.6rem); font-family: inherit; font-weight: bold; border-radius: 10px; cursor: pointer; width: 100%; margin-top: auto; }
+        #pronounsPage .btn-check { background: linear-gradient(to right, #F5576C 0%, #F093FB 100%); }
+        #pastTensePage .btn-check { background: linear-gradient(to right, #4facfe 0%, #00f2fe 100%); }
+
+        /* ================= تنسيقات خاصة بصفحة ضمائر الغائب ================= */
+        .split-layout { display: flex; gap: 10px; margin-bottom: 10px; }
+        .column { flex: 1; background: #fdfbfb; border: 2px solid #eee; border-radius: 10px; padding: 10px; box-shadow: 0 2px 4px rgba(0,0,0,0.02); }
+        .col-title { color: #4facfe; border-bottom: 1px dashed #ccc; padding-bottom: 5px; margin-bottom: 10px; }
+        .examples-wrap { display: flex; flex-direction: column; gap: 5px; }
+        .example-item { background: #fff; border: 1px solid #eee; border-radius: 6px; padding: 5px 8px; border-right: 4px solid #F5576C; }
+        .added-letter { color: #d63384; font-weight: 900; font-size: 1.2em; }
+        .transform-section { background: #fff5f6; border: 2px solid #fecfef; border-radius: 10px; padding: 10px; margin-top: 5px; }
+        .transform-box { background: #fff; padding: 8px; border-radius: 6px; margin-top: 5px; border: 1px solid #ffeeba; }
+
+        /* ================= تنسيقات خاصة بصفحة الفعل الماضي ================= */
+        .conversion-table { display: flex; flex-direction: column; gap: 10px; margin-bottom: 20px; }
+        .conversion-row { display: flex; align-items: center; justify-content: space-between; background: #fff; padding: 8px; border-radius: 10px; box-shadow: 0 2px 5px rgba(0,0,0,0.05); gap: 5px; }
+        .c-pronoun { background: #FFEB3B; padding: 5px 15px; border-radius: 20px; font-weight: bold; font-size: 1.3rem; border: 2px solid #FBC02D; min-width: 60px; text-align: center; }
+        .c-box { border: 1px solid #FF9800; padding: 5px 10px; border-radius: 5px; font-size: 1.4rem; font-weight: bold; background: #fff; flex: 1; text-align: center; }
+        .c-arrow { font-size: 1.5rem; color: #0277BD; font-weight: bold; }
+        .h-red { color: #D32F2F; font-weight: 900; } 
+        .h-blue { color: #0277BD; font-weight: 900; } 
+
+        .keywords-container { background: #f0f8ff; border: 2px solid #b3e5fc; border-radius: 10px; padding: 15px; }
+        .keywords-title { text-align: center; color: #0277BD; font-weight: bold; font-size: 1.3rem; margin-bottom: 10px; }
+        .keywords-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 8px; }
+        .keyword-card { background: #fff; border: 1px solid #81d4fa; border-radius: 6px; padding: 8px; display: flex; justify-content: space-between; align-items: center; }
+        .kw-ar { font-weight: bold; font-size: 1.1rem; color: #333; }
+        .kw-en { font-family: Arial, sans-serif; font-size: 0.9rem; color: #666; direction: ltr;}
+
+        @media (max-width: 600px) {
+            .split-layout { flex-direction: column; }
+            .c-box { font-size: 1.1rem; padding: 5px; }
+            .c-pronoun { font-size: 1.1rem; padding: 5px 10px; }
+            .c-arrow { font-size: 1.2rem; }
+        }
+    </style>
+</head>
+<body>
+
+    <div id="homePage" class="page-view active">
+        <div class="home-container">
+            <div class="cards-grid">
+                <div class="course-card card-pronouns" onclick="navigateTo('pronounsPage')">
+                    <div class="card-icon">👤</div>
+                    <div class="card-title">
+                        <span class="ar-text">ضمائر الغائب</span>
+                        <span class="en-text">Third-Person Pronouns</span>
+                    </div>
+                </div>
+
+                <div class="course-card card-past" onclick="navigateTo('pastTensePage')">
+                    <div class="card-icon">⏱️</div>
+                    <div class="card-title">
+                        <span class="ar-text">الفعل الماضي</span>
+                        <span class="en-text">The Past Tense</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="pronounsPage" class="page-view">
+        <button class="btn-back" onclick="navigateTo('homePage')">🔙 Back</button>
+        
+        <div class="activity-container">
+            <div class="main-header">
+                <div class="ar-title">ضمائر الغائب مع الفعل والاسم</div>
+                <div class="en-title">Third-Person Pronouns with Verbs and Nouns</div>
+            </div>
+
+            <div class="tabs">
+                <button class="tab-btn active" onclick="switchTab(event, 'pro-explain', 'pronounsPage')">
+                    <span class="ar-text">الشرح</span><span class="en-text">Explanation</span>
+                </button>
+                <button class="tab-btn tab-activity" onclick="switchTab(event, 'pro-activity', 'pronounsPage')">
+                    <span class="ar-text">النشاط</span><span class="en-text">Activity</span>
+                </button>
+            </div>
+
+            <div id="pro-explain" class="tab-content active">
+                <div class="split-layout">
+                    <div class="column">
+                        <div class="col-title line-group">
+                            <div class="ar-line">1. الضمائر المنفصلة (هُوَ - هِيَ)</div>
+                            <div class="en-line">1. Separate Pronouns (He - She)</div>
+                        </div>
+                        <div class="line-group">
+                            <div class="ar-line">نبدأ الفعل المضارع بحرف <span class="added-letter">يـ</span> (للمذكر) أو <span class="added-letter">تـ</span> (للمؤنث).</div>
+                            <div class="en-line">We start the present verb with 'يـ' (for male) or 'تـ' (for female).</div>
+                        </div>
+                        <div class="examples-wrap">
+                            <div class="example-item line-group">
+                                <div class="ar-line">هُوَ <span class="added-letter">يَـ</span>لْعَبُ / هِيَ <span class="added-letter">تَـ</span>لْعَبُ</div>
+                                <div class="en-line">He plays / She plays</div>
+                            </div>
+                            <div class="example-item line-group">
+                                <div class="ar-line">هُوَ <span class="added-letter">يُـ</span>شَارِك / هِيَ <span class="added-letter">تُـ</span>شَارِك</div>
+                                <div class="en-line">He participates / She participates</div>
+                            </div>
+                            <div class="example-item line-group">
+                                <div class="ar-line">هُوَ <span class="added-letter">يَـ</span>تَدَرّب / هِيَ <span class="added-letter">تَـ</span>تَدَرّب</div>
+                                <div class="en-line">He trains / She trains</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="column">
+                        <div class="col-title line-group">
+                            <div class="ar-line">2. الضمائر المتصلة (ـهُ - ـهَا)</div>
+                            <div class="en-line">2. Attached Pronouns (His - Her)</div>
+                        </div>
+                        <div class="line-group">
+                            <div class="ar-line">تضاف في نهاية الاسم للملكية، أو بعد الحروف.</div>
+                            <div class="en-line">Added at the end of a noun for possession, or after prepositions.</div>
+                        </div>
+                        <div class="examples-wrap">
+                            <div class="example-item line-group">
+                                <div class="ar-line">بَيْت: بَيْتُ<span class="added-letter">ـهُ</span> / بَيْتُ<span class="added-letter">ـهَا</span></div>
+                                <div class="en-line">House: His house / Her house</div>
+                            </div>
+                            <div class="example-item line-group">
+                                <div class="ar-line">مَدْرَسَة: مَدْرَسَتُ<span class="added-letter">ـهُ</span> / مَدْرَسَتُ<span class="added-letter">ـهَا</span></div>
+                                <div class="en-line">School: His school / Her school</div>
+                            </div>
+                            <div class="example-item line-group">
+                                <div class="ar-line">لِأَنَّ: لِأَنَّ<span class="added-letter">ـهُ</span> / لِأَنَّ<span class="added-letter">ـهَا</span></div>
+                                <div class="en-line">Because: Because he / Because she</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="transform-section">
+                    <div class="line-group">
+                        <div class="ar-line" style="color:#F5576C;">⭐ تطبيق شامل (Comprehensive Application)</div>
+                    </div>
+                    <div class="line-group">
+                        <div class="ar-line">أنا أَلْعَبُ كُرَةَ القَدَمِ وَلَاعِبِي المُفَضَّل هُوَ رُونَالْدُو.</div>
+                        <div class="en-line">I play football and my favorite player is Ronaldo.</div>
+                    </div>
+                    <div class="transform-box line-group">
+                        <div class="ar-line"><strong>للمذكر:</strong> هُوَ يَـلْعَبُ كُرَةَ القَدَمِ وَلَاعِبُـهُ المُفَضَّل هُوَ رُونَالْدُو.</div>
+                        <div class="en-line"><strong>Masculine:</strong> He plays football and his favorite player is Ronaldo.</div>
+                    </div>
+                    <div class="transform-box line-group">
+                        <div class="ar-line"><strong>للمؤنث:</strong> هِيَ تَـلْعَبُ كُرَةَ القَدَمِ وَلَاعِبُـهَا المُفَضَّل هُوَ رُونَالْدُو.</div>
+                        <div class="en-line"><strong>Feminine:</strong> She plays football and her favorite player is Ronaldo.</div>
+                    </div>
+                </div>
+            </div>
+
+            <div id="pro-activity" class="tab-content">
+                <div class="instruction-title">
+                    <div class="ar-title">
+                        <span class="ar-text">حوّل إلى (ضمير الغائب)</span>
+                        <span class="en-text">Convert to (Third-Person Pronoun)</span>
+                    </div>
+                </div>
+                <div class="question-card">
+                    <p id="pro_p_1">1- أنا لاعب قوي ونشيط لأني أمارس الرياضة بانتظام. <strong>(هو)</strong></p>
+                    <input type="text" id="q1" placeholder="اكتب الجملة كاملة هنا...">
+                    <span id="f1" class="feedback"></span>
+                </div>
+                <div class="question-card">
+                    <p id="pro_p_2">2- أنا أشجع اللاعب محمد صلاح، لاعب فريق ليفربول. <strong>(هي)</strong></p>
+                    <input type="text" id="q2" placeholder="اكتب الجملة كاملة هنا...">
+                    <span id="f2" class="feedback"></span>
+                </div>
+                <div class="question-card">
+                    <p id="pro_p_3">3- أنا أشاهد مباريات الدوري الإنجليزي مع صديقي. <strong>(هو)</strong></p>
+                    <input type="text" id="q3" placeholder="اكتب الجملة كاملة هنا...">
+                    <span id="f3" class="feedback"></span>
+                </div>
+                <button class="btn-check" onclick="checkProAnswers()">تحقق من الإجابات</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="pastTensePage" class="page-view blue-theme">
+        <button class="btn-back" onclick="navigateTo('homePage')">🔙 Back</button>
+        
+        <div class="activity-container">
+            <div class="main-header blue-theme">
+                <div class="ar-title">الزمن الماضي</div>
+                <div class="en-title">The Past Tense</div>
+            </div>
+
+            <div class="tabs">
+                <button class="tab-btn active" onclick="switchTab(event, 'past-explain', 'pastTensePage')">
+                    <span class="ar-text">الشرح</span><span class="en-text">Explanation</span>
+                </button>
+                <button class="tab-btn tab-activity" onclick="switchTab(event, 'past-activity-1', 'pastTensePage')">
+                    <span class="ar-text">نشاط 1</span><span class="en-text">Activity 1</span>
+                </button>
+                <button class="tab-btn tab-activity" onclick="switchTab(event, 'past-activity-2', 'pastTensePage')">
+                    <span class="ar-text">نشاط 2</span><span class="en-text">Activity 2</span>
+                </button>
+            </div>
+
+            <div id="past-explain" class="tab-content active">
+                
+                <div class="info-box">
+                    <div class="ar-text">العمود الأول هو (فعل مضارع). للتحويل إلى الماضي، نحذف حرف المضارعة من بداية الفعل المضارع ثم نضيف النهايات المناسبة مثل (تُ ، تْ ، نَا).</div>
+                    <div class="en-text">The first column is (Present Tense). To convert to the past tense, we remove the present tense letter from the beginning of the verb and add the appropriate endings like (تُ , تْ , نَا).</div>
+                </div>
+
+                <div class="conversion-table" dir="rtl">
+                    <div class="conversion-row"><div class="c-pronoun"><span class="h-red">أنا</span></div><div class="c-box"><span class="h-red">أَ</span>لْعَبُ</div><div class="c-arrow">⬅️</div><div class="c-box">لَعِبَ <span class="h-blue">+</span> <span class="h-red">تُ</span></div><div class="c-box">لَعِبْ<span class="h-red">تُ</span></div></div>
+                    <div class="conversion-row"><div class="c-pronoun"><span class="h-red">هو</span></div><div class="c-box"><span class="h-red">يَـ</span>لْعَبُ</div><div class="c-arrow">⬅️</div><div class="c-box">لَعِبَ</div><div class="c-box">لَعِبَ</div></div>
+                    <div class="conversion-row"><div class="c-pronoun"><span class="h-red">هي</span></div><div class="c-box"><span class="h-red">تَـ</span>لْعَبُ</div><div class="c-arrow">⬅️</div><div class="c-box">لَعِبَ <span class="h-blue">+</span> <span class="h-red">تْ</span></div><div class="c-box">لَعِبَ<span class="h-red">تْ</span></div></div>
+                    <div class="conversion-row"><div class="c-pronoun"><span class="h-red">نحن</span></div><div class="c-box"><span class="h-red">نَـ</span>لْعَبُ</div><div class="c-arrow">⬅️</div><div class="c-box">لَعِبَ <span class="h-blue">+</span> <span class="h-red">نَا</span></div><div class="c-box">لَعِبْ<span class="h-red">نَا</span></div></div>
+                </div>
+                <div class="keywords-container">
+                    <div class="keywords-title">⏳ كلمات تدل على الزمن الماضي (Keywords)</div>
+                    <div class="keywords-grid">
+                        <div class="keyword-card"><span class="kw-ar">أمس</span> <span class="kw-en">yesterday</span></div>
+                        <div class="keyword-card"><span class="kw-ar">الأسبوع الماضي</span> <span class="kw-en">last week</span></div>
+                        <div class="keyword-card"><span class="kw-ar">الشهر الماضي</span> <span class="kw-en">last month</span></div>
+                        <div class="keyword-card"><span class="kw-ar">العام الماضي</span> <span class="kw-en">last year</span></div>
+                        <div class="keyword-card"><span class="kw-ar">السبت الماضي</span> <span class="kw-en">last Saturday</span></div>
+                        <div class="keyword-card"><span class="kw-ar">الأحد الماضي</span> <span class="kw-en">last Sunday</span></div>
+                        <div class="keyword-card"><span class="kw-ar">الاثنين الماضي</span> <span class="kw-en">last Monday</span></div>
+                        <div class="keyword-card"><span class="kw-ar">الثلاثاء الماضي</span> <span class="kw-en">last Tuesday</span></div>
+                        <div class="keyword-card"><span class="kw-ar">الأربعاء الماضي</span> <span class="kw-en">last Wednesday</span></div>
+                        <div class="keyword-card"><span class="kw-ar">الخميس الماضي</span> <span class="kw-en">last Thursday</span></div>
+                        <div class="keyword-card"><span class="kw-ar">الجمعة الماضية</span> <span class="kw-en">last Friday</span></div>
+                        <div class="keyword-card"><span class="kw-ar">الإجازة الماضية</span> <span class="kw-en">last holiday</span></div>
+                        <div class="keyword-card"><span class="kw-ar">العطلة الماضية</span> <span class="kw-en">last holiday</span></div>
+                        <div class="keyword-card"><span class="kw-ar">الشتاء الماضي</span> <span class="kw-en">last winter</span></div>
+                        <div class="keyword-card"><span class="kw-ar">الصيف الماضي</span> <span class="kw-en">last summer</span></div>
+                    </div>
+                </div>
+            </div>
+
+            <div id="past-activity-1" class="tab-content">
+                <div class="instruction-title">
+                    <div class="ar-title">
+                        <span class="ar-text">أعِد كتابة الجملة في الزمن الماضي</span>
+                        <span class="en-text">Rewrite the sentence in the past tense</span>
+                    </div>
+                </div>
+                <div class="question-card">
+                    <p>1- أنا (أَقْرَأُ) قصة ممتعة.</p>
+                    <input type="text" id="p1_q1" placeholder="أمس أنا...">
+                    <span id="p1_f1" class="feedback"></span>
+                </div>
+                <div class="question-card">
+                    <p>2- نحن (نُسَافِرُ) إلى دبي.</p>
+                    <input type="text" id="p1_q2" placeholder="العطلة الماضية نحن...">
+                    <span id="p1_f2" class="feedback"></span>
+                </div>
+                <div class="question-card">
+                    <p>3- هي (تَرْسُمُ) لوحة جميلة.</p>
+                    <input type="text" id="p1_q3" placeholder="الأسبوع الماضي هي...">
+                    <span id="p1_f3" class="feedback"></span>
+                </div>
+                <button class="btn-check" onclick="checkPastAct1()">تحقق من الإجابات</button>
+            </div>
+
+            <div id="past-activity-2" class="tab-content">
+                <div class="instruction-title">
+                    <div class="ar-title">
+                        <span class="ar-text">صحح الخطأ ✏️</span>
+                        <span class="en-text">Correct the Mistake ✏️</span>
+                    </div>
+                </div>
+                
+                <div class="question-card">
+                    <p>1- أخي <span class="wrong-word">يذهب</span> إلى المدرسة بالمترو يوم الخميس الماضي.</p>
+                    <input type="text" id="p2_q1" placeholder="اكتب الكلمة الصحيحة أو الجملة...">
+                    <span id="p2_f1" class="feedback"></span>
+                </div>
+                <div class="question-card">
+                    <p>2- أنا <span class="wrong-word">ألعب</span> كرة القدم في الحديقة الجمعة الماضية.</p>
+                    <input type="text" id="p2_q2" placeholder="اكتب الكلمة الصحيحة أو الجملة...">
+                    <span id="p2_f2" class="feedback"></span>
+                </div>
+                <div class="question-card">
+                    <p>3- الصيف الماضي أختي <span class="wrong-word">تسافر</span> إلى فرنسا.</p>
+                    <input type="text" id="p2_q3" placeholder="اكتب الكلمة الصحيحة أو الجملة...">
+                    <span id="p2_f3" class="feedback"></span>
+                </div>
+                <div class="question-card">
+                    <p>4- أمس نحن <span class="wrong-word">نركب</span> الحافلة و <span class="wrong-word">نذهب</span> إلى ملعب كرة السلة.</p>
+                    <input type="text" id="p2_q4" placeholder="اكتب الكلمات الصحيحة أو الجملة...">
+                    <span id="p2_f4" class="feedback"></span>
+                </div>
+
+                <button class="btn-check" onclick="checkPastAct2()">تحقق من الإجابات</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // التنقل بين الصفحات الرئيسية
+        function navigateTo(pageId) {
+            const pages = document.querySelectorAll('.page-view');
+            pages.forEach(page => page.classList.remove('active'));
+            document.getElementById(pageId).classList.add('active');
+        }
+
+        // التنقل بين التابات الداخلية
+        function switchTab(evt, tabId, pageId) {
+            const page = document.getElementById(pageId);
+            const tabContents = page.getElementsByClassName("tab-content");
+            for (let i = 0; i < tabContents.length; i++) {
+                tabContents[i].style.display = "none";
+                tabContents[i].classList.remove("active");
+            }
+            const tabLinks = page.getElementsByClassName("tab-btn");
+            for (let i = 0; i < tabLinks.length; i++) {
+                tabLinks[i].classList.remove("active");
+            }
+            document.getElementById(tabId).style.display = "flex";
+            document.getElementById(tabId).classList.add("active");
+            evt.currentTarget.classList.add("active");
+        }
+
+        // تنظيف النصوص
+        const normalize = (str) => {
+            return str.replace(/[\u064B-\u065F]/g, '').replace(/[.,،!؟]/g, '').replace(/\s+/g, ' ').trim();
+        };
+
+        // تصحيح نشاط الضمائر الجديد مع التظليل للكلمات الخاطئة
+        function checkProAnswers() {
+            const answers = [
+                { 
+                    id: 'q1', feedbackId: 'f1', pId: 'pro_p_1',
+                    correct: "هو لاعب قوي ونشيط لأنه يمارس الرياضة بانتظام", 
+                    originalHTML: "1- أنا لاعب قوي ونشيط لأني أمارس الرياضة بانتظام. <strong>(هو)</strong>",
+                    highlightedHTML: "1- <mark>أنا</mark> لاعب قوي ونشيط <mark>لأني</mark> <mark>أمارس</mark> الرياضة بانتظام. <strong>(هو)</strong>"
+                },
+                { 
+                    id: 'q2', feedbackId: 'f2', pId: 'pro_p_2',
+                    correct: "هي تشجع اللاعب محمد صلاح لاعب فريق ليفربول", 
+                    originalHTML: "2- أنا أشجع اللاعب محمد صلاح، لاعب فريق ليفربول. <strong>(هي)</strong>",
+                    highlightedHTML: "2- <mark>أنا</mark> <mark>أشجع</mark> اللاعب محمد صلاح، لاعب فريق ليفربول. <strong>(هي)</strong>"
+                },
+                { 
+                    id: 'q3', feedbackId: 'f3', pId: 'pro_p_3',
+                    correct: "هو يشاهد مباريات الدوري الإنجليزي مع صديقه", 
+                    originalHTML: "3- أنا أشاهد مباريات الدوري الإنجليزي مع صديقي. <strong>(هو)</strong>",
+                    highlightedHTML: "3- <mark>أنا</mark> <mark>أشاهد</mark> مباريات الدوري الإنجليزي مع <mark>صديقي</mark>. <strong>(هو)</strong>"
+                }
+            ];
+
+            answers.forEach(item => {
+                const userAns = normalize(document.getElementById(item.id).value);
+                const pElem = document.getElementById(item.pId);
+                const feedbackElem = document.getElementById(item.feedbackId);
+                
+                if (userAns === normalize(item.correct) && userAns !== "") {
+                    feedbackElem.innerHTML = "✅ ممتاز!";
+                    feedbackElem.style.color = "#28a745";
+                    pElem.innerHTML = item.originalHTML; // إرجاع النص لأصله إذا كانت الإجابة صحيحة
+                } else if (userAns !== "") {
+                    feedbackElem.innerHTML = "❌ حاول مرة أخرى. الكلمات المظللة بالأحمر تحتاج إلى تغيير.";
+                    feedbackElem.style.color = "#dc3545";
+                    pElem.innerHTML = item.highlightedHTML; // تظليل الكلمات الخاطئة
+                } else {
+                    feedbackElem.innerHTML = "";
+                    pElem.innerHTML = item.originalHTML;
+                }
+            });
+        }
+
+        // تصحيح نشاط 1 (الفعل الماضي)
+        function checkPastAct1() {
+            const answers = [
+                { id: 'p1_q1', feedbackId: 'p1_f1', key: "قرأت" },
+                { id: 'p1_q2', feedbackId: 'p1_f2', key: "سافرنا" },
+                { id: 'p1_q3', feedbackId: 'p1_f3', key: "رسمت" }
+            ];
+
+            answers.forEach(item => {
+                const userAns = normalize(document.getElementById(item.id).value);
+                if (userAns.includes(item.key) && userAns !== "") {
+                    document.getElementById(item.feedbackId).innerHTML = "✅ إجابة صحيحة!";
+                    document.getElementById(item.feedbackId).style.color = "#28a745";
+                } else {
+                    document.getElementById(item.feedbackId).innerHTML = "❌ تأكد من تحويل الفعل للماضي.";
+                    document.getElementById(item.feedbackId).style.color = "#dc3545";
+                }
+            });
+        }
+
+        // تصحيح نشاط 2 (تصحيح الخطأ)
+        function checkPastAct2() {
+            const answers = [
+                { id: 'p2_q1', feedbackId: 'p2_f1', key: "ذهب" },
+                { id: 'p2_q2', feedbackId: 'p2_f2', key: "لعبت" },
+                { id: 'p2_q3', feedbackId: 'p2_f3', key: "سافرت" },
+                { id: 'p2_q4', feedbackId: 'p2_f4', key1: "ركبنا", key2: "ذهبنا" }
+            ];
+
+            answers.forEach(item => {
+                const userAns = normalize(document.getElementById(item.id).value);
+                const feedbackElem = document.getElementById(item.feedbackId);
+                
+                let isCorrect = false;
+                if (item.key1) {
+                    isCorrect = userAns.includes(item.key1) && userAns.includes(item.key2);
+                } else {
+                    isCorrect = userAns.includes(item.key);
+                }
+
+                if (isCorrect && userAns !== "") {
+                    feedbackElem.innerHTML = "✅ أحسنت! تصحيح سليم.";
+                    feedbackElem.style.color = "#28a745";
+                } else {
+                    feedbackElem.innerHTML = "❌ هناك خطأ، تذكر كيف نغير الفعل ليتناسب مع الضمير في الماضي.";
+                    feedbackElem.style.color = "#dc3545";
+                }
+            });
+        }
+    </script>
+</body>
+</html>

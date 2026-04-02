@@ -1,0 +1,640 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>اليوم المدرسيّ</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            font-family: 'Simplified Arabic', Tahoma, Arial, sans-serif;
+            min-height: 100vh;
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            display: flex;
+            justify-content: center;
+            padding: 15px;
+            color: #333;
+        }
+
+        .activity-container {
+            width: 100%; max-width: 900px; background: #ffffff;
+            border-radius: 20px; box-shadow: 0 15px 35px rgba(0,0,0,0.1);
+            display: flex; flex-direction: column; overflow: hidden;
+            border: 3px solid #fff;
+        }
+
+        .main-header {
+            text-align: center; padding: 20px; background: #fff;
+            color: #667eea; border-bottom: 2px solid #f0f4f8;
+        }
+        .main-header h1 { font-size: clamp(1.6rem, 5vw, 2.2rem); font-weight: bold; }
+
+        /* ================= التابات ================= */
+        .tabs { display: flex; background: #f0f4f8; padding: 8px; gap: 8px; flex-wrap: wrap; }
+        .tab-btn {
+            flex: 1; min-width: 100px; font-family: inherit; font-size: clamp(1.1rem, 3.5vw, 1.4rem);
+            font-weight: bold; color: #555; background: transparent; border: none;
+            padding: 12px 5px; border-radius: 12px; cursor: pointer; transition: 0.3s;
+            display: flex; align-items: center; justify-content: center;
+        }
+        .tab-btn.active {
+            color: #fff; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            box-shadow: 0 4px 10px rgba(102, 126, 234, 0.4);
+        }
+        .tab-content { display: none; flex-direction: column; padding: 20px; min-height: 400px; }
+        .tab-content.active { display: flex; animation: fadeIn 0.4s ease-in-out; }
+
+        /* تبديل لغة التابات */
+        .en-text { display: none; font-family: Arial, sans-serif; direction: ltr; font-weight: bold;}
+        .tab-btn:hover .ar-text, .tab-btn:active .ar-text { display: none; }
+        .tab-btn:hover .en-text, .tab-btn:active .en-text { display: block; animation: fadeIn 0.3s ease-in-out; }
+
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+        .btn-action {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white;
+            border: none; padding: 12px 25px; font-size: 1.2rem; font-weight: bold;
+            border-radius: 10px; cursor: pointer; transition: transform 0.2s, box-shadow 0.2s;
+            margin-top: 15px; font-family: Arial, sans-serif; display: inline-block;
+        }
+        .btn-action:hover { transform: scale(1.05); box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4); }
+
+        /* ================= التاب الأول: البطاقات (3D) ================= */
+        .flashcard-area { display: flex; flex-direction: column; align-items: center; justify-content: center; flex: 1; }
+        .scene { width: 100%; max-width: 320px; height: 220px; perspective: 1000px; margin-bottom: 30px; position: relative;}
+        .card {
+            width: 100%; height: 100%; position: relative; transition: transform 0.6s;
+            transform-style: preserve-3d; cursor: pointer;
+        }
+        .card.is-flipped { transform: rotateY(180deg); }
+        .card-face {
+            position: absolute; width: 100%; height: 100%; backface-visibility: hidden;
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+            border-radius: 20px; box-shadow: 0 8px 20px rgba(0,0,0,0.15); font-weight: bold; text-align: center; padding: 20px;
+        }
+        .card-front { background: #fff; border: 4px solid #667eea; }
+        .card-back { background: #667eea; color: #fff; transform: rotateY(180deg); direction: ltr; border: 4px solid #fff;}
+        
+        /* أيقونة الصوت */
+        .audio-icon {
+            position: absolute; top: 10px; right: 10px; font-size: 1.5rem;
+            background: #e2e8f0; border-radius: 50%; width: 40px; height: 40px;
+            display: flex; align-items: center; justify-content: center;
+            cursor: pointer; transition: 0.2s; z-index: 10;
+        }
+        .audio-icon:hover { background: #cbd5e0; transform: scale(1.1); }
+
+        .card-icon { font-size: 3.5rem; margin-bottom: 10px; }
+        .card-ar-text { font-size: 1.8rem; color: #333; line-height: 1.3; }
+        .card-en-text { font-size: 2rem; font-family: Arial, sans-serif; }
+
+        .nav-buttons { display: flex; gap: 20px; width: 100%; justify-content: center; direction: ltr; flex-wrap: wrap; }
+        .nav-btn {
+            background: #e2e8f0; color: #4a5568; border: none; padding: 10px 20px;
+            font-size: 1.2rem; font-weight: bold; border-radius: 10px; cursor: pointer;
+            font-family: Arial, sans-serif; transition: 0.2s; box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+        }
+        .nav-btn:hover { background: #cbd5e0; transform: translateY(-2px); }
+        .card-counter { font-size: 1.2rem; font-weight: bold; color: #666; margin-bottom: 10px; font-family: Arial, sans-serif; }
+
+        /* ================= التاب الثاني: نشاط 1 (MCQ) ================= */
+        .mcq-container { text-align: center; flex: 1; display: flex; flex-direction: column; align-items: center; width: 100%; }
+        .mcq-status { display: flex; justify-content: space-between; width: 100%; font-size: 1.2rem; font-weight: bold; color: #555; }
+        .mcq-word { font-size: 2.5rem; font-family: Arial, sans-serif; color: #667eea; font-weight: bold; margin-bottom: 25px; direction: ltr; }
+        .options-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; width: 100%; max-width: 600px; }
+        @media (max-width: 500px) { .options-grid { grid-template-columns: 1fr; } }
+        .option-btn {
+            background: #fff; border: 2px solid #cbd5e0; padding: 15px; border-radius: 12px;
+            font-size: 1.3rem; font-family: inherit; font-weight: bold; cursor: pointer;
+            transition: 0.2s; box-shadow: 0 4px 6px rgba(0,0,0,0.05); color: #333; line-height: 1.4;
+        }
+        .option-btn:hover { border-color: #667eea; background: #f7fafc; transform: translateY(-2px); }
+        .option-btn.correct { background: #48bb78; color: #fff; border-color: #48bb78; }
+        .option-btn.wrong { background: #f56565; color: #fff; border-color: #f56565; }
+        .mcq-feedback { height: 30px; font-size: 1.3rem; font-weight: bold; margin-top: 15px; }
+
+        /* ================= التاب الثالث: اختبار (سحب وإفلات) ================= */
+        .quiz-container { display: flex; flex-direction: column; gap: 20px; flex: 1; width: 100%; }
+        .quiz-status { text-align: left; font-size: 1.2rem; font-weight: bold; color: #555; direction: ltr; margin-bottom: -10px;}
+        .word-bank {
+            display: flex; flex-wrap: wrap; gap: 10px; justify-content: center;
+            background: #f8fafc; padding: 15px; border-radius: 15px; border: 2px dashed #cbd5e0;
+            min-height: 120px;
+        }
+        .word-chip {
+            background: #fff; border: 2px solid #667eea; padding: 8px 15px; border-radius: 20px;
+            font-size: 1.2rem; font-weight: bold; cursor: grab; user-select: none;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1); color: #4a5568; transition: 0.2s;
+        }
+        .word-chip:active { cursor: grabbing; transform: scale(1.05); }
+        .word-chip.selected { background: #ebf4ff; border-color: #3182ce; box-shadow: 0 0 10px rgba(49, 130, 206, 0.5); }
+        .word-chip.dragged { opacity: 0.5; }
+
+        .drop-rows-container { display: flex; flex-direction: column; gap: 10px; margin-top: 10px; width: 100%; }
+        .drop-row {
+            display: flex; align-items: center; justify-content: space-between; gap: 10px;
+            background: #fff; padding: 10px; border-radius: 10px; box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+            border: 1px solid #e2e8f0; flex-wrap: wrap;
+        }
+        .en-label { font-family: Arial, sans-serif; font-size: 1.1rem; font-weight: bold; color: #2d3748; width: 45%; direction: ltr; text-align: left;}
+        @media (max-width: 500px) { .en-label { width: 100%; text-align: center; margin-bottom: 5px; } }
+        .drop-zone {
+            flex: 1; min-height: 45px; min-width: 150px; border: 2px dashed #a0aec0; border-radius: 10px;
+            display: flex; align-items: center; justify-content: center; background: #fdfdfd; transition: 0.3s;
+            cursor: pointer;
+        }
+        .drop-zone.over { background: #ebf4ff; border-color: #667eea; }
+        
+        /* تأثيرات التحقق من الإجابات */
+        .drop-zone.correct-drop { border: 2px solid #48bb78 !important; background: #c6f6d5 !important; }
+        .drop-zone.wrong-drop { border: 2px solid #f56565 !important; background: #fed7d7 !important; }
+
+        .instruction-note { text-align: center; color: #718096; font-size: 1rem; margin-bottom: 5px; font-family: Arial, sans-serif; direction: ltr; }
+        
+        .hidden { display: none !important; }
+    </style>
+</head>
+<body>
+
+    <div class="activity-container">
+        <div class="main-header">
+            <h1>اليوم المدرسيّ 🏫</h1>
+        </div>
+
+        <div class="tabs">
+            <button class="tab-btn active" onclick="openTab(event, 'tab-study')">
+                <span class="ar-text">ادرس</span><span class="en-text">Study</span>
+            </button>
+            <button class="tab-btn" onclick="openTab(event, 'tab-mcq'); initMCQ();">
+                <span class="ar-text">نشاط 1</span><span class="en-text">Activity 1</span>
+            </button>
+            <button class="tab-btn" onclick="openTab(event, 'tab-quiz'); initQuiz();">
+                <span class="ar-text">اختبار</span><span class="en-text">Quiz</span>
+            </button>
+        </div>
+
+        <div id="tab-study" class="tab-content active">
+            <div class="flashcard-area">
+                <div class="card-counter" id="cardCounter">1 / 36</div>
+                <div class="scene" onclick="flipCard()">
+                    <div class="card" id="flashcard">
+                        <div class="card-face card-front">
+                            <div class="audio-icon" onclick="playAudio(event)" title="استمع">🔊</div>
+                            <div class="card-icon" id="cardIcon">📜</div>
+                            <div class="card-ar-text" id="cardAr">القَوَانِين</div>
+                        </div>
+                        <div class="card-face card-back">
+                            <div class="card-en-text" id="cardEn">rules</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="nav-buttons">
+                    <button class="nav-btn" onclick="prevCard()">Previous</button>
+                    <button class="nav-btn" onclick="nextCard()">Next</button>
+                </div>
+            </div>
+        </div>
+
+        <div id="tab-mcq" class="tab-content">
+            <div id="mcq-game-area" class="mcq-container">
+                <div class="mcq-status">
+                    <span id="mcq-score-display">Score: 0</span>
+                    <span id="mcq-progress">1 / 10</span>
+                </div>
+                <p class="instruction-note" style="margin-bottom: 20px;">Choose the correct answer</p>
+                <div class="mcq-word" id="mcq-question">Word</div>
+                <div class="options-grid" id="mcq-options">
+                    </div>
+                <div class="mcq-feedback" id="mcq-feedback"></div>
+            </div>
+            <div id="mcq-end-screen" class="mcq-container hidden" style="justify-content: center;">
+                <h2 style="font-size: 2rem; color: #48bb78; margin-bottom: 20px;">🎉 Activity Completed!</h2>
+                <p id="mcq-final-score" style="font-size: 1.5rem; font-weight: bold; margin-bottom: 20px;"></p>
+                <button class="btn-action" onclick="initMCQ()">Play Again</button>
+            </div>
+        </div>
+
+        <div id="tab-quiz" class="tab-content">
+            <div id="quiz-game-area" class="quiz-container">
+                <div class="quiz-status" id="quiz-score-display">Score: 0 / 10</div>
+                <p class="instruction-note">Drag the word or click it, then click on the appropriate box</p>
+                
+                <div class="word-bank" id="word-bank">
+                    </div>
+
+                <div class="drop-rows-container" id="drop-rows">
+                    </div>
+                
+                <div style="text-align: center;">
+                    <button class="btn-action hidden" id="check-quiz-btn" onclick="evaluateQuiz()">Check Answers</button>
+                    <button class="btn-action hidden" id="play-again-quiz-btn" onclick="initQuiz()">Play Again</button>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <script>
+        // ================= البيانات الجديدة: اليوم المدرسي =================
+        const vocabData = [
+            { ar: "القَوَانِين", en: "rules", icon: "📜" },
+            { ar: "صَارِمَة", en: "strict", icon: "🛑" },
+            { ar: "مَرِنَة", en: "flexible", icon: "🧘" },
+            { ar: "عَادِلَة", en: "fair", icon: "⚖️" },
+            { ar: "الزِّي المَدْرَسِيّ", en: "school uniform", icon: "👔" },
+            { ar: "ارْتِدَاء المُجَوْهَرَات", en: "wearing jewelry", icon: "💍" },
+            { ar: "نَضَعُ مَسَاحِيقَ التَّجْمِيل", en: "we put makeup", icon: "💄" },
+            { ar: "أَنِيق", en: "elegant", icon: "✨" },
+            { ar: "عَمَلِيّ", en: "practical", icon: "🛠️" },
+            { ar: "نَرْتَدِي", en: "we wear", icon: "👕" },
+            { ar: "عَادِيّ", en: "normal, usual, ordinary", icon: "😐" },
+            { ar: "قَمِيصاً أَبْيَضاً", en: "shirt white", icon: "🥼" },
+            { ar: "بِنْطَالاً أَخْضَراً", en: "pants green", icon: "👖" },
+            { ar: "الطَّبَقَات الِاجْتِمَاعِيَّة", en: "Social Classes", icon: "👥" },
+            { ar: "لَا يُمْكِنُكَ ارْتِدَاء", en: "you cannot wear", icon: "🚫" },
+            { ar: "حُجِزْتُ بَعْدَ المَدْرَسَة", en: "i got detention after school", icon: "🏫" },
+            { ar: "فِي الوَاقِع", en: "in fact", icon: "💡" },
+            { ar: "تَبْدَأ", en: "to start", icon: "🟢" },
+            { ar: "تَنْتَهِي", en: "end", icon: "🔴" },
+            { ar: "مَا عَدَا", en: "except for", icon: "➖" },
+            { ar: "مُدَّتُه", en: "it's duration", icon: "⏱️" },
+            { ar: "مَرَافِق رِيَاضِيَّة", en: "sports facilities", icon: "🏟️" },
+            { ar: "مَسْبَح", en: "swimming pool", icon: "🏊" },
+            { ar: "مَلْعَب رِيَاضِيّ", en: "sports field", icon: "⚽" },
+            { ar: "مَعَامِل", en: "laboratories", icon: "🔬" },
+            { ar: "قَاعَات إِعْلَامِيَّة", en: "briefing rooms", icon: "💻" },
+            { ar: "مَقْصَف", en: "canteen", icon: "🥪" },
+            { ar: "ثَانَوِيَّة", en: "secondary", icon: "🏫" },
+            { ar: "مُخْتَلِطَة", en: "mixed", icon: "👫" },
+            { ar: "جِنْسِيَّات", en: "nationalities", icon: "🌍" },
+            { ar: "اسْتِرَاحَة", en: "rest period, break", icon: "☕" },
+            { ar: "مُنَظَّم", en: "organized", icon: "📅" },
+            { ar: "الفُطُور", en: "breakfast", icon: "🥐" },
+            { ar: "الغَدَاء", en: "lunch", icon: "🍛" },
+            { ar: "قَبْل", en: "before", icon: "⏪" },
+            { ar: "بَعْد", en: "after", icon: "⏩" }
+        ];
+
+        // وظائف مساعدة
+        function shuffleArray(array) {
+            let curId = array.length;
+            while (0 !== curId) {
+                let randId = Math.floor(Math.random() * curId);
+                curId -= 1;
+                let tmp = array[curId];
+                array[curId] = array[randId];
+                array[randId] = tmp;
+            }
+            return array;
+        }
+
+        function openTab(evt, tabName) {
+            const contents = document.getElementsByClassName("tab-content");
+            for (let i = 0; i < contents.length; i++) {
+                contents[i].classList.remove("active");
+            }
+            const btns = document.getElementsByClassName("tab-btn");
+            for (let i = 0; i < btns.length; i++) {
+                btns[i].classList.remove("active");
+            }
+            document.getElementById(tabName).classList.add("active");
+            evt.currentTarget.classList.add("active");
+            window.speechSynthesis.cancel(); // إيقاف الصوت عند تغيير التاب
+        }
+
+        // ================= برمجة التاب الأول (البطاقات والصوت) =================
+        let currentCardIndex = 0;
+        const cardElement = document.getElementById('flashcard');
+        
+        function updateCardDisplay() {
+            cardElement.classList.remove('is-flipped');
+            setTimeout(() => {
+                document.getElementById('cardIcon').innerText = vocabData[currentCardIndex].icon;
+                document.getElementById('cardAr').innerText = vocabData[currentCardIndex].ar;
+                document.getElementById('cardEn').innerText = vocabData[currentCardIndex].en;
+                document.getElementById('cardCounter').innerText = `${currentCardIndex + 1} / ${vocabData.length}`;
+            }, 150);
+        }
+
+        function flipCard() {
+            cardElement.classList.toggle('is-flipped');
+        }
+
+        function playAudio(e) {
+            e.stopPropagation(); // منع قلب البطاقة عند الضغط على الصوت
+            window.speechSynthesis.cancel(); // إيقاف أي صوت سابق
+            
+            // قراءة الكلمة العربية
+            let utterance = new SpeechSynthesisUtterance(vocabData[currentCardIndex].ar);
+            utterance.lang = 'ar-SA';
+            utterance.rate = 0.8; // سرعة متوسطة
+            window.speechSynthesis.speak(utterance);
+        }
+
+        function nextCard() {
+            window.speechSynthesis.cancel(); // إيقاف الصوت عند التالي
+            currentCardIndex = (currentCardIndex + 1) % vocabData.length;
+            updateCardDisplay();
+        }
+
+        function prevCard() {
+            window.speechSynthesis.cancel(); // إيقاف الصوت عند السابق
+            currentCardIndex = (currentCardIndex - 1 + vocabData.length) % vocabData.length;
+            updateCardDisplay();
+        }
+
+        updateCardDisplay();
+
+        // ================= برمجة التاب الثاني (نشاط 1 MCQ) =================
+        let mcqQueue = [];
+        let mcqScore = 0;
+        let mcqTotalQuestions = 10;
+        let mcqCurrentItem = null;
+        let mcqLock = false;
+
+        function initMCQ() {
+            document.getElementById('mcq-game-area').classList.remove('hidden');
+            document.getElementById('mcq-end-screen').classList.add('hidden');
+            
+            let shuffled = shuffleArray([...vocabData]);
+            mcqQueue = shuffled.slice(0, mcqTotalQuestions).map(item => ({...item, attempts: 0}));
+            mcqScore = 10; 
+            
+            loadNextMCQ();
+        }
+
+        function loadNextMCQ() {
+            if (mcqQueue.length === 0) {
+                endMCQ();
+                return;
+            }
+
+            mcqLock = false;
+            mcqCurrentItem = mcqQueue[0];
+            document.getElementById('mcq-question').innerText = mcqCurrentItem.en;
+            document.getElementById('mcq-score-display').innerText = `Score: ${mcqScore}`;
+            
+            let completed = mcqTotalQuestions - mcqQueue.length + 1;
+            document.getElementById('mcq-progress').innerText = `${completed} / ${mcqTotalQuestions}`;
+            document.getElementById('mcq-feedback').innerText = '';
+
+            let options = [mcqCurrentItem.ar];
+            let allArWords = vocabData.map(v => v.ar).filter(w => w !== mcqCurrentItem.ar);
+            shuffleArray(allArWords);
+            options.push(allArWords[0], allArWords[1], allArWords[2]);
+            shuffleArray(options);
+
+            const optionsContainer = document.getElementById('mcq-options');
+            optionsContainer.innerHTML = '';
+            
+            options.forEach(opt => {
+                let btn = document.createElement('button');
+                btn.className = 'option-btn';
+                btn.innerText = opt;
+                btn.onclick = () => checkMCQAnswer(btn, opt);
+                optionsContainer.appendChild(btn);
+            });
+        }
+
+        function checkMCQAnswer(btn, selectedWord) {
+            if (mcqLock) return;
+            mcqLock = true;
+
+            const feedback = document.getElementById('mcq-feedback');
+            
+            if (selectedWord === mcqCurrentItem.ar) {
+                btn.classList.add('correct');
+                feedback.innerText = "✅ أحسنت!";
+                feedback.style.color = "#48bb78";
+                
+                mcqQueue.shift();
+                setTimeout(loadNextMCQ, 1000);
+            } else {
+                btn.classList.add('wrong');
+                feedback.innerText = "❌ خطأ! ستظهر الكلمة لاحقاً";
+                feedback.style.color = "#f56565";
+                
+                if (mcqCurrentItem.attempts === 0 && mcqScore > 0) {
+                    mcqScore--;
+                }
+                mcqCurrentItem.attempts++;
+                
+                let item = mcqQueue.shift();
+                mcqQueue.push(item);
+                
+                setTimeout(loadNextMCQ, 1500);
+            }
+        }
+
+        function endMCQ() {
+            document.getElementById('mcq-game-area').classList.add('hidden');
+            document.getElementById('mcq-end-screen').classList.remove('hidden');
+            document.getElementById('mcq-final-score').innerText = `Your Final Score: ${mcqScore} / 10`;
+        }
+
+        // ================= برمجة التاب الثالث (الاختبار - سحب وإفلات) =================
+        let selectedChipNode = null; 
+
+        function initQuiz() {
+            document.getElementById('check-quiz-btn').classList.add('hidden');
+            document.getElementById('play-again-quiz-btn').classList.add('hidden');
+            document.getElementById('quiz-score-display').innerText = `Score: 0 / 10`;
+            document.getElementById('quiz-score-display').style.color = "#555";
+            selectedChipNode = null;
+
+            let shuffledPool = shuffleArray([...vocabData]);
+            let bankWords = shuffledPool.slice(0, 13);
+            let questionWords = shuffleArray([...bankWords]).slice(0, 10);
+
+            const bankContainer = document.getElementById('word-bank');
+            bankContainer.innerHTML = '';
+            
+            shuffleArray(bankWords).forEach((word) => {
+                let chip = document.createElement('div');
+                chip.className = 'word-chip';
+                chip.innerText = word.ar;
+                chip.setAttribute('draggable', 'true');
+                chip.dataset.ar = word.ar;
+                
+                chip.addEventListener('dragstart', handleDragStart);
+                chip.addEventListener('dragend', handleDragEnd);
+                chip.addEventListener('click', handleChipClick);
+
+                bankContainer.appendChild(chip);
+            });
+
+            const rowsContainer = document.getElementById('drop-rows');
+            rowsContainer.innerHTML = '';
+
+            questionWords.forEach((word) => {
+                let row = document.createElement('div');
+                row.className = 'drop-row';
+                
+                let label = document.createElement('div');
+                label.className = 'en-label';
+                label.innerText = word.en;
+
+                let zone = document.createElement('div');
+                zone.className = 'drop-zone';
+                zone.dataset.matchAr = word.ar;
+
+                zone.addEventListener('dragover', handleDragOver);
+                zone.addEventListener('dragleave', handleDragLeave);
+                zone.addEventListener('drop', handleDrop);
+                zone.addEventListener('click', handleZoneClick);
+
+                row.appendChild(label);
+                row.appendChild(zone);
+                rowsContainer.appendChild(row);
+            });
+        }
+
+        // --- دوال السحب والإفلات ---
+        let draggedElement = null;
+
+        function handleDragStart(e) {
+            draggedElement = this;
+            this.classList.add('dragged');
+            e.dataTransfer.effectAllowed = 'move';
+            if (selectedChipNode) {
+                selectedChipNode.classList.remove('selected');
+                selectedChipNode = null;
+            }
+        }
+
+        function handleDragEnd(e) {
+            this.classList.remove('dragged');
+            draggedElement = null;
+        }
+
+        function handleDragOver(e) {
+            e.preventDefault();
+            if(!this.classList.contains('filled')) {
+                this.classList.add('over');
+            }
+            return false;
+        }
+
+        function handleDragLeave(e) {
+            this.classList.remove('over');
+        }
+
+        function handleDrop(e) {
+            e.stopPropagation();
+            this.classList.remove('over');
+            if (this.classList.contains('filled') || !draggedElement) return;
+            processDropMatch(draggedElement, this);
+            return false;
+        }
+
+        function handleChipClick(e) {
+            if (this.classList.contains('dragged') || this.parentElement.classList.contains('drop-zone')) return;
+            
+            if (selectedChipNode) selectedChipNode.classList.remove('selected');
+            
+            if (selectedChipNode !== this) {
+                selectedChipNode = this;
+                this.classList.add('selected');
+            } else {
+                selectedChipNode = null; 
+            }
+        }
+
+        function handleZoneClick(e) {
+            if (this.classList.contains('filled') || !selectedChipNode) return;
+            processDropMatch(selectedChipNode, this);
+        }
+
+        // دالة لإرجاع الكلمة للبنك إذا غير الطالب رأيه (قبل التحقق)
+        function handlePlacedChipClick(e) {
+            e.stopPropagation();
+            if(!document.getElementById('play-again-quiz-btn').classList.contains('hidden')) return; // تم التحقق، لا يمكن التعديل
+
+            const zone = this.parentElement;
+            document.getElementById('word-bank').appendChild(this);
+            zone.classList.remove('filled');
+            
+            // إعادة خصائص الكلمة كما كانت
+            this.style.cursor = 'grab';
+            this.style.border = '2px solid #667eea';
+            this.style.background = '#fff';
+            this.style.boxShadow = '0 2px 5px rgba(0,0,0,0.1)';
+            this.style.padding = '8px 15px';
+            this.setAttribute('draggable', 'true');
+            this.addEventListener('click', handleChipClick);
+            this.removeEventListener('click', handlePlacedChipClick);
+            
+            checkQuizReady();
+        }
+
+        function processDropMatch(chipEl, zoneEl) {
+            chipEl.classList.remove('selected');
+            selectedChipNode = null;
+
+            zoneEl.appendChild(chipEl);
+            zoneEl.classList.add('filled');
+            
+            // إخفاء حدود الكلمة وجعلها جزءاً من الصندوق، لكن تبقى قابلة للضغط لإزالتها
+            chipEl.removeEventListener('click', handleChipClick);
+            chipEl.addEventListener('click', handlePlacedChipClick);
+            chipEl.setAttribute('draggable', 'false');
+            chipEl.style.cursor = 'pointer';
+            chipEl.style.border = 'none';
+            chipEl.style.background = 'transparent';
+            chipEl.style.boxShadow = 'none';
+            chipEl.style.padding = '0';
+
+            checkQuizReady();
+        }
+
+        function checkQuizReady() {
+            const filledCount = document.querySelectorAll('.drop-zone.filled').length;
+            const btnCheck = document.getElementById('check-quiz-btn');
+            if (filledCount === 10) {
+                btnCheck.classList.remove('hidden');
+            } else {
+                btnCheck.classList.add('hidden');
+            }
+        }
+
+        function evaluateQuiz() {
+            let score = 0;
+            document.getElementById('check-quiz-btn').classList.add('hidden');
+            document.getElementById('play-again-quiz-btn').classList.remove('hidden');
+            
+            const zones = document.querySelectorAll('.drop-zone');
+            zones.forEach(zone => {
+                const expectedAr = zone.dataset.matchAr;
+                const chip = zone.querySelector('.word-chip');
+                if (chip) {
+                    const droppedAr = chip.dataset.ar;
+                    if (expectedAr === droppedAr) {
+                        score++;
+                        zone.classList.add('correct-drop');
+                    } else {
+                        zone.classList.add('wrong-drop');
+                    }
+                    // إغلاق الكلمة تماماً
+                    chip.removeEventListener('click', handlePlacedChipClick);
+                    chip.style.cursor = 'default';
+                }
+            });
+
+            const scoreDisplay = document.getElementById('quiz-score-display');
+            scoreDisplay.innerText = `Final Score: ${score} / 10`;
+            scoreDisplay.style.color = score >= 5 ? '#48bb78' : '#f56565';
+            
+            // قفل الكلمات المتبقية في البنك
+            const remainingChips = document.querySelectorAll('.word-bank .word-chip');
+            remainingChips.forEach(c => {
+                c.setAttribute('draggable', 'false');
+                c.removeEventListener('click', handleChipClick);
+                c.style.cursor = 'default';
+                c.style.opacity = '0.5';
+            });
+        }
+
+    </script>
+</body>
+</html>
