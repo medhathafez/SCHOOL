@@ -211,6 +211,7 @@
         .green-word { color: #16a34a; }
         .blue-word { color: #0284c7; } 
         .red-word { color: #dc2626; } 
+        .dark-pink { color: #d81b60; } /* لون بينك غامق لتمييز المؤنث */
 
         .word-hover {
             position: relative;
@@ -459,46 +460,42 @@
             <div id="tab1" class="tab-pane active">
                 <div class="interactive-sentence" title="اضغط للاستماع" onclick="playSentence('tab1')">
                     <span class="speaker-icon">🔊</span>
-                    <span class="word-hover green-word" data-en="Usually">عَادَةً</span>
-                    <span class="word-hover target-word" data-en="[Time]">........</span>
-                    <span class="word-hover normal-word" data-en=",">،</span>
-                    <span class="word-hover normal-word" data-en="I go">أَذْهَبُ</span>
-                    <span class="word-hover normal-word" data-en="to">إِلَى</span>
-                    <span class="word-hover normal-word" data-en="the cinema">السِّينِمَا</span>
-                    <span class="word-hover normal-word" data-en="with">مَعَ</span>
-                    <span class="word-hover target-word" data-en="[Person]">.......</span>
-                    <span class="word-hover normal-word" data-en="to watch">لِنُشَاهِدَ</span>
-                    <span class="word-hover normal-word" data-en="the movies">الْأَفْلَامَ</span>
-                    <span class="word-hover target-word" data-en="[Adjective]">.............</span>
+                    <span class="word-hover green-word" data-en="Actually">فِي الْوَاقِعِ</span>
+                    <span class="word-hover target-word" data-en="[Subject]">...........</span>
+                    <span class="word-hover target-word" data-en="[Adjective 1]">..........</span>
+                    <span class="word-hover red-word" data-en="But it">لَكِنَّهُ</span>
+                    <span class="word-hover target-word" data-en="[Adjective 2]">...........</span>
                 </div>
                 
                 <div class="vocab-grid-3col">
                     <div class="vocab-col">
-                        <div class="vocab-card" onclick="playVocab(this)"><span class="vocab-ar">فِي وَقْتِ فَرَاغِي</span><span class="vocab-en">In my free time</span></div>
-                        <div class="vocab-card" onclick="playVocab(this)"><span class="vocab-ar">يَوْمَ السَّبْتِ</span><span class="vocab-en">On Saturday</span></div>
-                        <div class="vocab-card" onclick="playVocab(this)"><span class="vocab-ar">فِي الْعُطْلَةِ</span><span class="vocab-en">In the holiday</span></div>
-                        <div class="vocab-card" onclick="playVocab(this)"><span class="vocab-ar">فِي الْإِجَازَةِ الصَّيْفِيَّةِ</span><span class="vocab-en">In the summer vacation</span></div>
-                        <div class="vocab-card" onclick="playVocab(this)"><span class="vocab-ar">فِي نِهَايَةِ الْأُسْبُوعِ</span><span class="vocab-en">At the weekend</span></div>
+                        <div class="vocab-card" onclick="playVocab(this)"><span class="vocab-ar">الْيَوْمَ الدِّرَاسِيَّ</span><span class="vocab-en">The school day</span></div>
+                        <div class="vocab-card" onclick="playVocab(this)"><span class="vocab-ar">الْيَوْمَ الرِّيَاضِيَّ</span><span class="vocab-en">The sports day</span></div>
+                        <div class="vocab-card" onclick="playVocab(this)"><span class="vocab-ar">الِامْتِحَانَ</span><span class="vocab-en">The exam</span></div>
+                        <div class="vocab-card" onclick="playVocab(this)"><span class="vocab-ar">الصَّيْفَ</span><span class="vocab-en">The summer</span></div>
+                        <div class="vocab-card" onclick="playVocab(this)"><span class="vocab-ar">الْكِتَابَ</span><span class="vocab-en">The book</span></div>
+                        <div class="vocab-card" onclick="playVocab(this)"><span class="vocab-ar">دَرْسَ الْعَرَبِيَّةِ</span><span class="vocab-en">The Arabic lesson</span></div>
                     </div>
                     <div class="vocab-col">
-                        <div class="vocab-card" onclick="playVocab(this)"><span class="vocab-ar">صَدِيقِي</span><span class="vocab-en">My friend</span></div>
-                        <div class="vocab-card" onclick="playVocab(this)"><span class="vocab-ar">أَصْدِقَائِي</span><span class="vocab-en">My friends</span></div>
-                        <div class="vocab-card" onclick="playVocab(this)"><span class="vocab-ar">أُسْرَتِي</span><span class="vocab-en">My family</span></div>
-                        <div class="vocab-card" onclick="playVocab(this)"><span class="vocab-ar">أَخِي</span><span class="vocab-en">My brother</span></div>
-                        <div class="vocab-card" onclick="playVocab(this)"><span class="vocab-ar">أُخْتِي</span><span class="vocab-en">My sister</span></div>
-                        <div class="vocab-card" onclick="playVocab(this)"><span class="vocab-ar">أَبِي</span><span class="vocab-en">My father</span></div>
-                        <div class="vocab-card" onclick="playVocab(this)"><span class="vocab-ar">أُمِّي</span><span class="vocab-en">My mother</span></div>
+                        <div class="vocab-card" onclick="playVocab(this)"><span class="vocab-ar">مُمْتِعٌ</span><span class="vocab-en">Fun</span></div>
+                        <div class="vocab-card" onclick="playVocab(this)"><span class="vocab-ar">مُفِيدٌ</span><span class="vocab-en">Useful</span></div>
+                        <div class="vocab-card" onclick="playVocab(this)"><span class="vocab-ar">سَهْلٌ</span><span class="vocab-en">Easy</span></div>
+                        <div class="vocab-card" onclick="playVocab(this)"><span class="vocab-ar">رَائِعٌ</span><span class="vocab-en">Wonderful</span></div>
+                        <div class="vocab-card" onclick="playVocab(this)"><span class="vocab-ar">جَمِيلٌ</span><span class="vocab-en">Beautiful</span></div>
+                        <div class="vocab-card" onclick="playVocab(this)"><span class="vocab-ar">مُسَلٍّ</span><span class="vocab-en">Entertaining</span></div>
                     </div>
                     <div class="vocab-col">
-                        <div class="vocab-card" onclick="playVocab(this)"><span class="vocab-ar">الْمُثِيرَةَ</span><span class="vocab-en">Exciting</span></div>
-                        <div class="vocab-card" onclick="playVocab(this)"><span class="vocab-ar">الْجَدِيدَةَ</span><span class="vocab-en">New</span></div>
-                        <div class="vocab-card" onclick="playVocab(this)"><span class="vocab-ar">الْمُضْحِكَةَ</span><span class="vocab-en">Funny</span></div>
-                        <div class="vocab-card" onclick="playVocab(this)"><span class="vocab-ar">الْمُشَوِّقَةَ</span><span class="vocab-en">Thrilling</span></div>
+                        <div class="vocab-card" onclick="playVocab(this)"><span class="vocab-ar">طَوِيلٌ</span><span class="vocab-en">Long</span></div>
+                        <div class="vocab-card" onclick="playVocab(this)"><span class="vocab-ar">صَعْبٌ</span><span class="vocab-en">Difficult</span></div>
+                        <div class="vocab-card" onclick="playVocab(this)"><span class="vocab-ar">مُتْعِبٌ</span><span class="vocab-en">Tiring</span></div>
+                        <div class="vocab-card" onclick="playVocab(this)"><span class="vocab-ar">قَصِيرٌ</span><span class="vocab-en">Short</span></div>
+                        <div class="vocab-card" onclick="playVocab(this)"><span class="vocab-ar">حَارٌّ</span><span class="vocab-en">Hot</span></div>
+                        <div class="vocab-card" onclick="playVocab(this)"><span class="vocab-ar">مُمِلٌّ</span><span class="vocab-en">Boring</span></div>
                     </div>
                 </div>
 
                 <div class="assembled-sentence">
-                    <span class="green-word">عَادَةً</span> <span class="blue-word">يَوْمَ السَّبْتِ</span>، أَذْهَبُ إِلَى السِّينِمَا مَعَ <span class="blue-word">أُسْرَتِي</span> لِنُشَاهِدَ الْأَفْلَامَ <span class="blue-word">الْجَدِيدَةَ</span>.
+                    <span class="green-word">فِي الْوَاقِعِ</span> الْيَوْمَ الدِّرَاسِيَّ طَوِيلٌ <span class="red-word">لَكِنَّهُ</span> مُمْتِعٌ.
                 </div>
             </div>
 
@@ -506,35 +503,42 @@
                 
                 <div class="interactive-sentence" title="اضغط للاستماع" onclick="playSentence('tab2')">
                     <span class="speaker-icon">🔊</span>
-                    <span class="word-hover normal-word" data-en="I">أَنَا</span>
-                    <span class="word-hover normal-word" data-en="like">أُحِبُّ</span>
-                    <span class="word-hover normal-word" data-en="movies">أَفْلَامَ</span>
-                    <span class="word-hover target-word" data-en="[Type]">...........</span>
-                    <span class="word-hover red-word" data-en="because it is">لِأَنَّهَا</span>
-                    <span class="word-hover target-word" data-en="[Adjective]">.........</span>
+                    <span class="word-hover target-word" data-en="[Subject]">...........</span>
+                    <span class="word-hover blue-word" data-en="Starts in/at"><span class="dark-pink">تَبْدَأُ</span>/يَبْدَأُ فِي</span>
+                    <span class="word-hover target-word" data-en="[Start Time]">...........</span>
+                    <span class="word-hover normal-word" data-en=", and ends in/at">، <span class="dark-pink">وَتَنْتَهِي</span>/وَيَنْتَهِي فِي</span>
+                    <span class="word-hover target-word" data-en="[End Time]">...........</span>
                 </div>
                 
-                <div class="vocab-grid-2col">
+                <div class="vocab-grid-3col">
                     <div class="vocab-col">
-                        <div class="vocab-card" onclick="playVocab(this)"><span class="vocab-ar">الْكُومِيدْيَا</span><span class="vocab-en">Comedy</span></div>
-                        <div class="vocab-card" onclick="playVocab(this)"><span class="vocab-ar">الْحَرَكَةِ</span><span class="vocab-en">Action</span></div>
-                        <div class="vocab-card" onclick="playVocab(this)"><span class="vocab-ar">الرُّعْبِ</span><span class="vocab-en">Horror</span></div>
-                        <div class="vocab-card" onclick="playVocab(this)"><span class="vocab-ar">الْخَيَالِ الْعِلْمِيِّ</span><span class="vocab-en">Science fiction</span></div>
-                        <div class="vocab-card" onclick="playVocab(this)"><span class="vocab-ar">الرُّومَانْسِيَّةِ</span><span class="vocab-en">Romantic</span></div>
+                        <div class="vocab-card" onclick="playVocab(this)"><span class="vocab-ar">الدُّرُوسُ</span><span class="vocab-en">The lessons</span></div>
+                        <div class="vocab-card" onclick="playVocab(this)"><span class="vocab-ar">الْمَسْرَحِيَّةُ</span><span class="vocab-en">The play</span></div>
+                        <div class="vocab-card" onclick="playVocab(this)"><span class="vocab-ar">الْفِيلْمُ</span><span class="vocab-en">The movie</span></div>
+                        <div class="vocab-card" onclick="playVocab(this)"><span class="vocab-ar">الِاخْتِبَارَاتُ</span><span class="vocab-en">The exams</span></div>
+                        <div class="vocab-card" onclick="playVocab(this)"><span class="vocab-ar">الرِّحْلَةُ</span><span class="vocab-en">The trip</span></div>
+                        <div class="vocab-card" onclick="playVocab(this)"><span class="vocab-ar">الْعُطْلَةُ</span><span class="vocab-en">The holiday</span></div>
                     </div>
                     <div class="vocab-col">
-                        <div class="vocab-card" onclick="playVocab(this)"><span class="vocab-ar">مَلِيئَةٌ بِالْإِثَارَةِ وَالتَّشْوِيقِ</span><span class="vocab-en">Full of excitement and thrill</span></div>
-                        <div class="vocab-card" onclick="playVocab(this)"><span class="vocab-ar">مُمْتِعَةٌ</span><span class="vocab-en">Fun</span></div>
-                        <div class="vocab-card" onclick="playVocab(this)"><span class="vocab-ar">مُسَلِّيَةٌ</span><span class="vocab-en">Entertaining</span></div>
-                        <div class="vocab-card" onclick="playVocab(this)"><span class="vocab-ar">مُثِيرَةٌ</span><span class="vocab-en">Exciting</span></div>
-                        <div class="vocab-card" onclick="playVocab(this)"><span class="vocab-ar">مُضْحِكَةٌ</span><span class="vocab-en">Funny</span></div>
-                        <div class="vocab-card" onclick="playVocab(this)"><span class="vocab-ar">شَيِّقَةٌ</span><span class="vocab-en">Interesting</span></div>
-                        <div class="vocab-card" onclick="playVocab(this)"><span class="vocab-ar">رَائِعَةٌ</span><span class="vocab-en">Wonderful</span></div>
+                        <div class="vocab-card" onclick="playVocab(this)"><span class="vocab-ar">السَّاعَةِ الثَّامِنَةِ صَبَاحًا</span><span class="vocab-en">Eight o'clock in the morning</span></div>
+                        <div class="vocab-card" onclick="playVocab(this)"><span class="vocab-ar">السَّاعَةِ السَّابِعَةِ مَسَاءً</span><span class="vocab-en">Seven o'clock in the evening</span></div>
+                        <div class="vocab-card" onclick="playVocab(this)"><span class="vocab-ar">شَهْرِ سِبْتَمْبِرَ</span><span class="vocab-en">September</span></div>
+                        <div class="vocab-card" onclick="playVocab(this)"><span class="vocab-ar">يَوْمِ الْأَحَدِ</span><span class="vocab-en">Sunday</span></div>
+                        <div class="vocab-card" onclick="playVocab(this)"><span class="vocab-ar">الصَّبَاحِ الْبَاكِرِ</span><span class="vocab-en">Early morning</span></div>
+                        <div class="vocab-card" onclick="playVocab(this)"><span class="vocab-ar">مُنْتَصَفِ النَّهَارِ</span><span class="vocab-en">Midday</span></div>
+                    </div>
+                    <div class="vocab-col">
+                        <div class="vocab-card" onclick="playVocab(this)"><span class="vocab-ar">السَّاعَةِ الثَّالِثَةِ عَصْرًا</span><span class="vocab-en">Three o'clock in the afternoon</span></div>
+                        <div class="vocab-card" onclick="playVocab(this)"><span class="vocab-ar">السَّاعَةِ التَّاسِعَةِ مَسَاءً</span><span class="vocab-en">Nine o'clock in the evening</span></div>
+                        <div class="vocab-card" onclick="playVocab(this)"><span class="vocab-ar">شَهْرِ يُونْيُو</span><span class="vocab-en">June</span></div>
+                        <div class="vocab-card" onclick="playVocab(this)"><span class="vocab-ar">يَوْمِ الْخَمِيسِ</span><span class="vocab-en">Thursday</span></div>
+                        <div class="vocab-card" onclick="playVocab(this)"><span class="vocab-ar">وَقْتِ الظَّهِيرَةِ</span><span class="vocab-en">Noon</span></div>
+                        <div class="vocab-card" onclick="playVocab(this)"><span class="vocab-ar">مُنْتَصَفِ اللَّيْلِ</span><span class="vocab-en">Midnight</span></div>
                     </div>
                 </div>
 
                 <div class="assembled-sentence">
-                    أَنَا أُحِبُّ أَفْلَامَ <span class="blue-word">الْحَرَكَةِ</span> <span class="red-word">لِأَنَّهَا</span> <span class="blue-word">مَلِيئَةٌ بِالْإِثَارَةِ وَالتَّشْوِيقِ</span>.
+                    الدُّرُوسُ <span class="blue-word"><span class="dark-pink">تَبْدَأُ</span> فِي</span> السَّاعَةِ الثَّامِنَةِ صَبَاحًا، <span class="dark-pink">وَتَنْتَهِي</span> فِي السَّاعَةِ الثَّالِثَةِ عَصْرًا.
                 </div>
             </div>
 

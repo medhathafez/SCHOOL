@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="google" content="notranslate">
-    <title>استخرج من النص</title>
+    <title>استخرج من النص - نشاط مزدوج</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Simplified Arabic', Tahoma, sans-serif; }
@@ -13,28 +13,69 @@
             background-color: #f3f4f6; 
             min-height: 100vh;
             display: flex;
-            justify-content: center;
-            align-items: flex-start;
-            padding: 1vh 1vw; 
+            flex-direction: column;
+            align-items: center;
+            padding: 2vh 1vw; 
             overflow-y: auto; 
             overflow-x: hidden;
         }
 
-        .app-container {
+        /* Tabs Styles */
+        .tabs-container {
             display: flex;
+            justify-content: center;
+            gap: 15px;
+            width: 100%;
+            max-width: 1400px;
+            margin-bottom: 20px;
+            direction: rtl;
+        }
+
+        .tab-btn {
+            padding: 12px 35px;
+            font-size: 22px;
+            font-weight: bold;
+            cursor: pointer;
+            border: 2px solid #3b82f6;
+            border-radius: 8px;
+            background: white;
+            color: #3b82f6;
+            transition: all 0.3s;
+            min-width: 180px;
+            text-align: center;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+        }
+
+        .tab-btn:hover { background: #eff6ff; }
+        .tab-btn.active { background: #3b82f6; color: white; box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3); }
+
+        .tab-btn .ar-text { display: inline; }
+        .tab-btn .en-text { display: none; font-family: Tahoma, sans-serif; font-size: 20px; }
+        
+        .tab-btn:hover .ar-text { display: none; }
+        .tab-btn:hover .en-text { display: inline; }
+        .tab-btn.active:hover .en-text { display: none; }
+        .tab-btn.active:hover .ar-text { display: inline; }
+
+        /* App Container Styles */
+        .app-container {
+            display: none; /* Hidden by default, toggled via JS */
             flex-direction: row;
             width: 100%;
             max-width: 1400px;
             background: white;
             border-radius: 12px; 
             box-shadow: 0 5px 20px rgba(0,0,0,0.08);
-            height: auto; 
-            min-height: 98vh;
+            min-height: 85vh;
             position: relative;
         }
 
+        .app-container.active-quiz {
+            display: flex;
+        }
+
         .sidebar {
-            width: 300px;
+            width: 320px;
             background-color: #ffffff;
             padding: 10px 15px; 
             display: flex;
@@ -78,7 +119,7 @@
             line-height: 1.3;
         }
         
-        .categories-list { display: flex; flex-direction: column; gap: 5px; direction: rtl; flex-grow: 1; } 
+        .categories-list { display: flex; flex-direction: column; gap: 5px; direction: rtl; flex-grow: 1; overflow-y: auto;} 
         
         .category-btn {
             display: flex; align-items: center; justify-content: flex-start; 
@@ -185,8 +226,8 @@
         }
 
         .reading-text {
-            font-size: 28px; 
-            line-height: 2; 
+            font-size: 30px; 
+            line-height: 2.2; 
             color: #000000;
             text-align: justify;
             font-weight: bold; 
@@ -206,42 +247,80 @@
 </head>
 <body>
 
-    <div class="app-container" id="capture-area">
-        <aside class="sidebar">
-            <div class="score-stamp" id="score-stamp">
-                <div id="stamp-score"></div>
-            </div>
-            <div class="title-container">
-                <h2 class="title">
-                    اسْتَخْرِج مِن النَّصِّ
-                    <span style="display: block; font-size: 14px; font-weight: normal; color: #6b7280; font-family: Tahoma, sans-serif; margin-top: 4px; line-height: 1;">Extract from the text</span>
-                </h2>
-            </div>
-            <p class="instruction">Click an item to hear it & select 1 matching word in the text. Click Submit when done.</p>
-            
-            <div class="categories-list" id="categories-container"></div>
-            
-            <button class="submit-btn" id="submit-btn" onclick="submitQuiz()">Submit</button>
-        </aside>
-
-        <main class="text-area">
-            <div id="text-container" class="reading-text"></div>
-        </main>
+    <div class="tabs-container">
+        <button class="tab-btn active" id="tab-0" onclick="switchTab(0)">
+            <span class="ar-text">الجزء الأول</span>
+            <span class="en-text">Part 1</span>
+        </button>
+        <button class="tab-btn" id="tab-1" onclick="switchTab(1)">
+            <span class="ar-text">الجزء الثاني</span>
+            <span class="en-text">Part 2</span>
+        </button>
     </div>
 
+    <div id="quizzes-wrapper" style="width: 100%; display: flex; justify-content: center;"></div>
+
     <script>
-        let categories = [
-            { id: 'c1', label: 'فِعْلًا مُضَارِعًا', en: 'Present tense verb', color: '#3b82f6' },
-            { id: 'c2', label: 'صِفَاتٍ', en: 'Adjectives', color: '#22c55e' },
-            { id: 'c3', label: 'رَوَابِطَ', en: 'Connectors', color: '#f59e0b' },
-            { id: 'c4', label: 'ظَرْفَ زَمَانٍ', en: 'Adverb of time', color: '#8b5cf6' },
-            { id: 'c5', label: 'جَمْعَ مُؤَنَّثٍ', en: 'Feminine plural', color: '#06b6d4' },
-            { id: 'c6', label: 'جَمْعَ تَكْسِيرٍ', en: 'Broken plural', color: '#ef4444' }, 
-            { id: 'c7', label: 'ضِدَّ (مُتَشَابِهَة)', en: 'Antonym', color: '#ec4899' },
-            { id: 'c8', label: 'جَمْعَ (طَالِب)', en: 'Plural', color: '#14b8a6' },
-            { id: 'c9', label: 'مُثَنَّى (دَرْس)', en: 'Dual', color: '#84cc16' },
-            { id: 'c10', label: 'جَمْعَ (جِنْسِيَّة)', en: 'Plural', color: '#9333ea' }
+        // تعريف بيانات كلا النشاطين
+        const quizzesData = [
+            {
+                id: 0,
+                text: `مَرْحَبًا، اسْمِي زَايِدٌ. أَوَدُّ أَنْ أُخْبِرَكُمْ أَنِّي أَدْرُسُ فِي مَدْرَسَةٍ اسْمُهَا كُلِّيَّةُ جُمِيرَا، وَهِيَ مَدْرَسَةٌ ثَانَوِيَّةٌ دَوْلِيَّةٌ مُخْتَلِطَةٌ فِيهَا عَدَدٌ كَبِيرٌ جِدًّا مِنَ الطُّلَّابِ مِنْ دُوَلٍ وَجِنْسِيَّاتٍ مُخْتَلِفَةٍ. فِي الحَقِيقَةِ اليَوْمُ الدِّرَاسِيُّ فِي كُلِّيَّةِ جُمِيرَا مُنَظَّمٌ لِلْغَايَةِ. حَيْثُ يُوجَدُ فِي مَدْرَسَتِي سِتَّةُ دُرُوسٍ فِي اليَوْمِ، دَرْسَانِ صَبَاحًا وَدَرْسَانِ بَعْدَ اسْتِرَاحَةِ الفُطُورِ وَدَرْسَانِ بَعْدَ اسْتِرَاحَةِ الغَدَاءِ.`,
+                categories: [
+                    { id: 'c1', label: 'فِعْلًا مُضَارِعًا', en: 'Present tense verb', color: '#3b82f6' },
+                    { id: 'c2', label: 'صِفَاتٍ', en: 'Adjectives', color: '#22c55e' },
+                    { id: 'c3', label: 'رَوَابِطَ', en: 'Connectors', color: '#f59e0b' },
+                    { id: 'c4', label: 'ظَرْفَ زَمَانٍ', en: 'Adverb of time', color: '#8b5cf6' },
+                    { id: 'c5', label: 'جَمْعَ مُؤَنَّثٍ', en: 'Feminine plural', color: '#06b6d4' },
+                    { id: 'c6', label: 'جَمْعَ تَكْسِيرٍ', en: 'Broken plural', color: '#ef4444' }, 
+                    { id: 'c7', label: 'ضِدَّ (مُتَشَابِهَة)', en: 'Antonym', color: '#ec4899' },
+                    { id: 'c8', label: 'جَمْعَ (طَالِب)', en: 'Plural', color: '#14b8a6' },
+                    { id: 'c9', label: 'مُثَنَّى (دَرْس)', en: 'Dual', color: '#84cc16' },
+                    { id: 'c10', label: 'جَمْعَ (جِنْسِيَّة)', en: 'Plural', color: '#9333ea' }
+                ],
+                rawAnswers: {
+                    'c1': ['أَوَدُّ', 'أُخْبِرَكُمْ', 'أَدْرُسُ', 'يُوجَدُ'],
+                    'c2': ['ثَانَوِيَّةٌ', 'دَوْلِيَّةٌ', 'مُخْتَلِطَةٌ', 'كَبِيرٌ', 'مُخْتَلِفَةٍ', 'الدِّرَاسِيُّ', 'مُنَظَّمٌ'],
+                    'c3': ['حَيْثُ', 'وَهِيَ', 'وَجِنْسِيَّاتٍ', 'وَدَرْسَانِ'], 
+                    'c4': ['صَبَاحًا', 'بَعْدَ'],
+                    'c5': ['جِنْسِيَّاتٍ', 'وَجِنْسِيَّاتٍ'],
+                    'c6': ['الطُّلَّابِ', 'دُوَلٍ', 'دُرُوسٍ'],
+                    'c7': ['مُخْتَلِفَةٍ'],
+                    'c8': ['الطُّلَّابِ'],
+                    'c9': ['دَرْسَانِ', 'وَدَرْسَانِ'],
+                    'c10': ['جِنْسِيَّاتٍ', 'وَجِنْسِيَّاتٍ']
+                }
+            },
+            {
+                id: 1,
+                text: `فِي الواقِعِ اليَوْمَ الدِّراسيِّ طَويلٌ لَكِنَّهُ مُمْتِعٌ . الدُّروسُ تَبْدَأُ فِي السّاعَةِ الثّامِنَةِ إِلَّا رُبْعَ وتَنْتَهي فِي السّاعَةِ الثّالِثَةِ مَاعَدَا يَوْم الجُمْعَةِ ، تَنْتَهي الدُّروسُ فِي السّاعَةِ الحادية عَشْرَةَ ونصف ظُهْرًا . وَكُلُّ دَرْسٍ مُدَّتُهُ خمسٌ وخمسون (55) دَقيقَةٍ مَا عَدَا يَوْمُ الجُمُعَةِ مُدَّةَ الدَّرْسِ أربعون (40) دَقيقَةٍ . فِي المَدْرَسَةِ يوجَدُ مَرافِقُ رياضيَّةٌ مِثْلُ المَسْبَحِ وَأَيْضًا مَلْعَبٌ رياضيٌّ كَبيرٌ والذَّى نُمارِسُ فِيه رِيَاضَاتٍ مُخْتَلِفَةً . هُنَاكَ أَيْضًا مَعامِلُ وَقاعاتٌ إِعْلاميَّةٌ ومُقَصَفٌ كِبِيرٌ نَتناوَلُ فِيه غَدائَنا.`,
+                categories: [
+                    { id: 'p2c1', label: 'فِعْل مُضَارِع', en: 'Present verb', color: '#3b82f6' },
+                    { id: 'p2c2', label: 'صِفَات', en: 'Adjectives', color: '#22c55e' },
+                    { id: 'p2c3', label: 'رَوَابِط', en: 'Connectors', color: '#f59e0b' },
+                    { id: 'p2c4', label: 'جَمْع مُؤَنَّث', en: 'Feminine plural', color: '#06b6d4' },
+                    { id: 'p2c5', label: 'جَمْع تَكْسِير', en: 'Broken plural', color: '#ef4444' },
+                    { id: 'p2c6', label: 'ضِدّ (صَغِير)', en: 'Antonym', color: '#ec4899' },
+                    { id: 'p2c7', label: 'جَمْع (قَاعَة)', en: 'Plural', color: '#14b8a6' },
+                    { id: 'p2c8', label: 'جَمْع (رِيَاضَة)', en: 'Plural', color: '#9333ea' }
+                ],
+                rawAnswers: {
+                    'p2c1': ['تَبْدَأُ', 'تَنْتَهي', 'وتَنْتَهي', 'يوجَدُ', 'نُمارِسُ', 'نَتناوَلُ'],
+                    'p2c2': ['طَويلٌ', 'مُمْتِعٌ', 'رياضيَّةٌ', 'رياضيٌّ', 'كَبيرٌ', 'مُخْتَلِفَةً', 'إِعْلاميَّةٌ', 'كِبِيرٌ'],
+                    'p2c3': ['لَكِنَّهُ', 'إِلَّا', 'مَاعَدَا', 'مَا', 'وَأَيْضًا', 'أَيْضًا', 'والذَّى', 'مِثْلُ'], 
+                    'p2c4': ['رِيَاضَاتٍ', 'قاعاتٌ', 'وَقاعاتٌ'],
+                    'p2c5': ['الدُّروسُ', 'مَرافِقُ', 'مَعامِلُ'],
+                    'p2c6': ['كَبيرٌ', 'كِبِيرٌ'],
+                    'p2c7': ['قاعاتٌ', 'وَقاعاتٌ'],
+                    'p2c8': ['رِيَاضَاتٍ']
+                }
+            }
         ];
+
+        // مصفوفات لحفظ حالة كل نشاط بشكل مستقل
+        let activeCategoryIds = [null, null];
+        let userSelectionsMulti = [{}, {}]; 
+        let phraseSpanGroupsMulti = [[], []];
 
         function shuffleArray(array) {
             for (let i = array.length - 1; i > 0; i--) {
@@ -251,28 +330,14 @@
                 array[j] = temp;
             }
         }
-        shuffleArray(categories);
-
-        const rawAnswers = {
-            'c1': ['أَوَدُّ', 'أُخْبِرَكُمْ', 'أَدْرُسُ', 'يُوجَدُ'],
-            'c2': ['ثَانَوِيَّةٌ', 'دَوْلِيَّةٌ', 'مُخْتَلِطَةٌ', 'كَبِيرٌ', 'مُخْتَلِفَةٍ', 'الدِّرَاسِيُّ', 'مُنَظَّمٌ'],
-            'c3': ['حَيْثُ', 'وَهِيَ', 'وَجِنْسِيَّاتٍ', 'وَدَرْسَانِ'], 
-            'c4': ['صَبَاحًا', 'بَعْدَ'],
-            'c5': ['جِنْسِيَّاتٍ', 'وَجِنْسِيَّاتٍ'],
-            'c6': ['الطُّلَّابِ', 'دُوَلٍ', 'دُرُوسٍ'],
-            'c7': ['مُخْتَلِفَةٍ'],
-            'c8': ['الطُّلَّابِ'],
-            'c9': ['دَرْسَانِ', 'وَدَرْسَانِ'],
-            'c10': ['جِنْسِيَّاتٍ', 'وَجِنْسِيَّاتٍ']
-        };
 
         function normalizeArabic(text) {
             return text.split(/\s+/).map(word => {
                 let w = word.replace(/[\u064B-\u065F\u0640]/g, "") 
-                           .replace(/[أإآٱ]/g, "ا") 
-                           .replace(/ة/g, "ه") 
-                           .replace(/[يى]/g, "ي") 
-                           .replace(/[،.؛؟!"'-]/g, "");
+                            .replace(/[أإآٱ]/g, "ا") 
+                            .replace(/ة/g, "ه") 
+                            .replace(/[يى]/g, "ي") 
+                            .replace(/[،.؛؟!"'()-]/g, "");
                 
                 if (w.length > 3 && w.startsWith("ال")) w = w.substring(2);
                 else if (w.length > 4 && (w.startsWith("وال") || w.startsWith("فال") || w.startsWith("كال") || w.startsWith("بال"))) w = w.charAt(0) + w.substring(3);
@@ -281,53 +346,10 @@
             }).join(" ").trim();
         }
 
-        const correctAnswers = {};
-        for (let catId in rawAnswers) correctAnswers[catId] = rawAnswers[catId].map(normalizeArabic);
-
-        let rawText = `مَرْحَبًا، اسْمِي زَايِدٌ. أَوَدُّ أَنْ أُخْبِرَكُمْ أَنِّي أَدْرُسُ فِي مَدْرَسَةٍ اسْمُهَا كُلِّيَّةُ جُمِيرَا، وَهِيَ مَدْرَسَةٌ ثَانَوِيَّةٌ دَوْلِيَّةٌ مُخْتَلِطَةٌ فِيهَا عَدَدٌ كَبِيرٌ جِدًّا مِنَ الطُّلَّابِ مِنْ دُوَلٍ وَجِنْسِيَّاتٍ مُخْتَلِفَةٍ. فِي الحَقِيقَةِ اليَوْمُ الدِّرَاسِيُّ فِي كُلِّيَّةِ جُمِيرَا مُنَظَّمٌ لِلْغَايَةِ. حَيْثُ يُوجَدُ فِي مَدْرَسَتِي سِتَّةُ دُرُوسٍ فِي اليَوْمِ، دَرْسَانِ صَبَاحًا وَدَرْسَانِ بَعْدَ اسْتِرَاحَةِ الفُطُورِ وَدَرْسَانِ بَعْدَ اسْتِرَاحَةِ الغَدَاءِ.`;
-
-        // إزالة خاصية الدمج وجعل كل كلمة في النص فردية ومستقلة تماماً
-        let processedHTML = rawText.replace(/([\u0600-\u06FF]+)/g, '<span class="word">$1</span>');
-
-        const textContainer = document.getElementById('text-container');
-        textContainer.innerHTML = processedHTML;
-
         function hexToRgba(hex, alpha) {
             let r = parseInt(hex.slice(1, 3), 16), g = parseInt(hex.slice(3, 5), 16), b = parseInt(hex.slice(5, 7), 16);
             return `rgba(${r}, ${g}, ${b}, ${alpha})`;
         }
-
-        const categoriesContainer = document.getElementById('categories-container');
-        let activeCategoryId = null;
-        let activeColor = null;
-        let userSelections = {}; // يخزن مصفوفة من العناصر (الكلمات) لكل تصنيف
-        let phraseSpanGroups = []; // لحفظ الكلمات التي تشكل الجمل المطلوبة
-
-        // إعداد مجموعات الجمل المخفية لتسهيل اختيار الجملة كاملة بضغطة واحدة
-        let allWordSpans = Array.from(document.querySelectorAll('.word'));
-        let spanWords = allWordSpans.map(s => normalizeArabic(s.textContent));
-
-        Object.keys(correctAnswers).forEach(catId => {
-            correctAnswers[catId].forEach(ans => {
-                let normAnsWords = ans.split(' ');
-                if (normAnsWords.length > 1) { // إذا كانت الإجابة جملة وليست كلمة واحدة
-                    let len = normAnsWords.length;
-                    for (let i = 0; i <= spanWords.length - len; i++) {
-                        let match = true;
-                        for (let j = 0; j < len; j++) {
-                            if (spanWords[i+j] !== normAnsWords[j]) {
-                                match = false; break;
-                            }
-                        }
-                        if (match) {
-                            let group = [];
-                            for(let j = 0; j < len; j++) group.push(allWordSpans[i+j]);
-                            phraseSpanGroups.push({ catId: catId, spans: group });
-                        }
-                    }
-                }
-            });
-        });
 
         function playCategoryAudio(text) {
             if ('speechSynthesis' in window) {
@@ -339,31 +361,89 @@
             }
         }
 
-        categories.forEach(cat => {
-            const btn = document.createElement('div');
-            btn.className = 'category-btn';
-            btn.id = `btn-${cat.id}`;
-            btn.dataset.en = cat.en; 
+        function switchTab(index) {
+            document.getElementById('quiz-0').classList.remove('active-quiz');
+            document.getElementById('quiz-1').classList.remove('active-quiz');
             
-            btn.onclick = () => {
-                playCategoryAudio(cat.label);
-                selectCategory(cat.id, cat.color, btn);
-            };
+            document.getElementById(`quiz-${index}`).classList.add('active-quiz');
+            
+            document.getElementById('tab-0').classList.toggle('active', index === 0);
+            document.getElementById('tab-1').classList.toggle('active', index === 1);
+        }
 
-            btn.innerHTML = `
-                <span class="dot" style="background-color: ${cat.color};"></span>
-                <div class="cat-text-container">
-                    <div class="cat-label-container">
-                        <span class="cat-label">${cat.label}</span>
-                        <span class="cat-status" id="status-${cat.id}"></span>
-                    </div>
-                </div>
-            `;
-            categoriesContainer.appendChild(btn);
-        });
+        // بناء الواجهة والأنشطة
+        function initQuizzes() {
+            const wrapper = document.getElementById('quizzes-wrapper');
 
-        function selectCategory(id, color, btnElement) {
-            Array.from(document.querySelectorAll('.category-btn')).forEach(b => {
+            quizzesData.forEach((q, index) => {
+                shuffleArray(q.categories);
+
+                q.correctAnswers = {};
+                for (let catId in q.rawAnswers) {
+                    q.correctAnswers[catId] = q.rawAnswers[catId].map(normalizeArabic);
+                }
+
+                let processedHTML = q.text.replace(/([\u0600-\u06FF0-9]+)/g, '<span class="word">$1</span>');
+
+                let container = document.createElement('div');
+                container.className = `app-container ${index === 0 ? 'active-quiz' : ''}`;
+                container.id = `quiz-${index}`;
+                
+                container.innerHTML = `
+                    <aside class="sidebar">
+                        <div class="score-stamp" id="score-stamp-${index}">
+                            <div id="stamp-score-${index}"></div>
+                        </div>
+                        <div class="title-container">
+                            <h2 class="title">
+                                اسْتَخْرِج مِن النَّصِّ
+                                <span style="display: block; font-size: 14px; font-weight: normal; color: #6b7280; font-family: Tahoma, sans-serif; margin-top: 4px; line-height: 1;">Extract from the text</span>
+                            </h2>
+                        </div>
+                        <p class="instruction">Click an item & select all matching words. Click Submit when done.</p>
+                        
+                        <div class="categories-list" id="categories-container-${index}"></div>
+                        
+                        <button class="submit-btn" id="submit-btn-${index}" onclick="submitQuiz(${index})">Submit</button>
+                    </aside>
+                    <main class="text-area">
+                        <div id="text-container-${index}" class="reading-text">${processedHTML}</div>
+                    </main>
+                `;
+                
+                wrapper.appendChild(container);
+
+                const categoriesContainer = document.getElementById(`categories-container-${index}`);
+                
+                q.categories.forEach(cat => {
+                    const btn = document.createElement('div');
+                    btn.className = `category-btn cat-btn-${index}`;
+                    btn.id = `btn-${index}-${cat.id}`;
+                    btn.dataset.en = cat.en; 
+                    
+                    btn.onclick = () => {
+                        playCategoryAudio(cat.label);
+                        selectCategory(index, cat.id, cat.color, btn);
+                    };
+
+                    btn.innerHTML = `
+                        <span class="dot" style="background-color: ${cat.color};"></span>
+                        <div class="cat-text-container">
+                            <div class="cat-label-container">
+                                <span class="cat-label">${cat.label}</span>
+                                <span class="cat-status" id="status-${index}-${cat.id}"></span>
+                            </div>
+                        </div>
+                    `;
+                    categoriesContainer.appendChild(btn);
+                });
+
+                bindWords(index, q);
+            });
+        }
+
+        function selectCategory(index, id, color, btnElement) {
+            Array.from(document.querySelectorAll(`.cat-btn-${index}`)).forEach(b => {
                 b.classList.remove('active');
                 b.style.backgroundColor = "#ffffff";
                 b.style.borderColor = "#f3f4f6";
@@ -373,71 +453,121 @@
             btnElement.style.backgroundColor = hexToRgba(color, 0.3);
             btnElement.style.borderColor = color;
 
-            activeCategoryId = id;
-            activeColor = color;
+            activeCategoryIds[index] = id;
         }
 
-        // دالة مسؤولة عن تلوين الكلمات بناءً على الاختيارات
-        function updateSpanColors() {
-            // إزالة الألوان من جميع الكلمات أولاً
+        function updateSpanColors(index) {
+            let q = quizzesData[index];
+            let allWordSpans = Array.from(document.querySelectorAll(`#quiz-${index} .word`));
+            
             allWordSpans.forEach(s => {
                 s.style.backgroundColor = "";
                 s.style.borderBottomColor = "transparent";
             });
 
-            // ترتيب الفئات لتلوين الجمل الكبيرة أولاً ثم الكلمات الفردية فوقها
-            let activeCats = categories.filter(cat => userSelections[cat.id]);
-            activeCats.sort((a, b) => userSelections[b.id].length - userSelections[a.id].length);
+            let activeCats = q.categories.filter(cat => userSelectionsMulti[index][cat.id] && userSelectionsMulti[index][cat.id].length > 0);
 
             activeCats.forEach(cat => {
-                userSelections[cat.id].forEach(span => {
+                userSelectionsMulti[index][cat.id].forEach(span => {
                     span.style.backgroundColor = hexToRgba(cat.color, 0.3);
                     span.style.borderBottomColor = cat.color;
                 });
             });
         }
 
-        allWordSpans.forEach(span => {
-            span.onclick = function() {
-                if (!activeCategoryId) {
-                    alert("الرجاء الضغط على المطلوب من القائمة الجانبية أولاً.");
-                    return;
-                }
-                
-                let isPhraseCategory = correctAnswers[activeCategoryId].some(ans => ans.includes(' '));
-                let selectedSpans = [this]; // الافتراضي: اختيار الكلمة التي تم الضغط عليها فقط
+        function bindWords(index, q) {
+            let allWordSpans = Array.from(document.querySelectorAll(`#quiz-${index} .word`));
+            let spanWords = allWordSpans.map(s => normalizeArabic(s.textContent));
 
-                // إذا كان المطلوب هو جملة (مثل النفي أو التمني) وتم الضغط على أي كلمة من كلماتها، تتظلل كلها
-                if (isPhraseCategory) {
-                    let possibleGroups = phraseSpanGroups.filter(g => g.catId === activeCategoryId && g.spans.includes(this));
-                    if (possibleGroups.length > 0) {
-                        possibleGroups.sort((a,b) => b.spans.length - a.spans.length); // اختيار أطول تطابق للجملة
-                        selectedSpans = possibleGroups[0].spans;
+            // إنشاء مجموعات الجمل إن وجدت
+            Object.keys(q.correctAnswers).forEach(catId => {
+                q.correctAnswers[catId].forEach(ans => {
+                    let normAnsWords = ans.split(' ');
+                    if (normAnsWords.length > 1) { 
+                        let len = normAnsWords.length;
+                        for (let i = 0; i <= spanWords.length - len; i++) {
+                            let match = true;
+                            for (let j = 0; j < len; j++) {
+                                if (spanWords[i+j] !== normAnsWords[j]) { match = false; break; }
+                            }
+                            if (match) {
+                                let group = [];
+                                for(let j = 0; j < len; j++) group.push(allWordSpans[i+j]);
+                                phraseSpanGroupsMulti[index].push({ catId: catId, spans: group });
+                            }
+                        }
                     }
-                }
+                });
+            });
 
-                userSelections[activeCategoryId] = selectedSpans;
-                
-                let statusEl = document.getElementById(`status-${activeCategoryId}`);
-                statusEl.innerText = " (تم الاختيار)";
-                statusEl.style.color = "#3b82f6";
-                statusEl.style.display = 'inline-block';
+            allWordSpans.forEach(span => {
+                span.onclick = function() {
+                    let activeCatId = activeCategoryIds[index];
+                    if (!activeCatId) {
+                        alert("الرجاء الضغط على المطلوب من القائمة الجانبية أولاً.");
+                        return;
+                    }
+                    
+                    let isPhraseCategory = q.correctAnswers[activeCatId].some(ans => ans.includes(' '));
+                    let selectedSpans = [this]; 
 
-                updateSpanColors();
-            };
-        });
+                    if (isPhraseCategory) {
+                        let possibleGroups = phraseSpanGroupsMulti[index].filter(g => g.catId === activeCatId && g.spans.includes(this));
+                        if (possibleGroups.length > 0) {
+                            possibleGroups.sort((a,b) => b.spans.length - a.spans.length); 
+                            selectedSpans = possibleGroups[0].spans;
+                        }
+                    }
 
-        function revealAllAnswers() {
+                    if (!userSelectionsMulti[index][activeCatId]) {
+                        userSelectionsMulti[index][activeCatId] = [];
+                    }
+
+                    let catSelections = userSelectionsMulti[index][activeCatId];
+                    let alreadySelected = selectedSpans.every(s => catSelections.includes(s));
+
+                    if (alreadySelected) {
+                        // إزالة التحديد إذا تم النقر عليه مرة أخرى
+                        selectedSpans.forEach(s => {
+                            let sIdx = catSelections.indexOf(s);
+                            if (sIdx > -1) catSelections.splice(sIdx, 1);
+                        });
+                    } else {
+                        // إضافة التحديد (متعدد)
+                        selectedSpans.forEach(s => {
+                            if (!catSelections.includes(s)) {
+                                catSelections.push(s);
+                            }
+                        });
+                    }
+                    
+                    let statusEl = document.getElementById(`status-${index}-${activeCatId}`);
+                    if (catSelections.length > 0) {
+                        statusEl.innerText = ` (${catSelections.length} مُحدد)`;
+                        statusEl.style.color = "#3b82f6";
+                        statusEl.style.display = 'inline-block';
+                    } else {
+                        statusEl.style.display = 'none';
+                    }
+
+                    updateSpanColors(index);
+                };
+            });
+        }
+
+        function revealAllAnswers(index) {
+            let q = quizzesData[index];
+            let allWordSpans = Array.from(document.querySelectorAll(`#quiz-${index} .word`));
+            
             allWordSpans.forEach(s => {
                 s.style.backgroundColor = "";
                 s.style.borderBottom = "3px solid transparent";
             });
 
-            let cats = categories.slice();
-            cats.forEach(cat => {
-                let isPhrase = correctAnswers[cat.id].some(ans => ans.includes(' '));
+            q.categories.forEach(cat => {
+                let isPhrase = q.correctAnswers[cat.id].some(ans => ans.includes(' '));
                 if (isPhrase) {
-                    let group = phraseSpanGroups.find(g => g.catId === cat.id);
+                    let group = phraseSpanGroupsMulti[index].find(g => g.catId === cat.id);
                     if (group) {
                         group.spans.forEach(span => {
                             span.style.borderBottom = `3px dashed ${cat.color}`;
@@ -447,7 +577,7 @@
                 } else {
                     allWordSpans.forEach(span => {
                         let cleanWord = normalizeArabic(span.textContent);
-                        if (correctAnswers[cat.id].includes(cleanWord)) {
+                        if (q.correctAnswers[cat.id].includes(cleanWord)) {
                             span.style.borderBottom = `3px dashed ${cat.color}`;
                             span.style.backgroundColor = hexToRgba(cat.color, 0.15);
                         }
@@ -456,18 +586,30 @@
             });
         }
 
-        function submitQuiz() {
+        // --- التعديل هنا في دالة الحفظ وحساب الدرجات ---
+        function submitQuiz(index) {
+            let q = quizzesData[index];
             let score = 0;
-            let total = categories.length;
+            let total = q.categories.length;
             
-            categories.forEach(cat => {
-                let statusEl = document.getElementById(`status-${cat.id}`);
-                let selectedSpans = userSelections[cat.id];
+            q.categories.forEach(cat => {
+                let statusEl = document.getElementById(`status-${index}-${cat.id}`);
+                let catSelections = userSelectionsMulti[index][cat.id] || [];
                 
-                if (selectedSpans && selectedSpans.length > 0) {
-                    // دمج الكلمات المحددة للتحقق منها
-                    let cleanCombinedWord = selectedSpans.map(s => normalizeArabic(s.textContent)).join(" ");
-                    if (correctAnswers[cat.id].includes(cleanCombinedWord)) {
+                if (catSelections.length > 0) {
+                    let isCorrect = true; // نفترض أن الإجابة صحيحة مبدئياً
+
+                    // التحقق: هل يوجد أي اختيار خاطئ ضمن ما حدده الطالب؟
+                    for (let i = 0; i < catSelections.length; i++) {
+                        let text = normalizeArabic(catSelections[i].textContent);
+                        // إذا كانت الكلمة المحددة غير موجودة في الإجابات الصحيحة
+                        if (!q.correctAnswers[cat.id].includes(text)) {
+                            isCorrect = false; // إذاً الإجابة خاطئة
+                            break; // نوقف البحث بمجرد العثور على خطأ واحد
+                        }
+                    }
+                    
+                    if (isCorrect) {
                         score++;
                         statusEl.innerText = ' ✔ صحيح';
                         statusEl.style.color = '#10b981';
@@ -482,39 +624,33 @@
                 statusEl.style.display = 'inline-block';
             });
 
-            let stamp = document.getElementById('score-stamp');
-            document.getElementById('stamp-score').innerText = `You got ${score}/${total}!`;
+            let stamp = document.getElementById(`score-stamp-${index}`);
+            document.getElementById(`stamp-score-${index}`).innerText = `You got ${score}/${total}!`;
             stamp.style.display = 'block';
 
-            document.getElementById('submit-btn').style.display = 'none';
+            document.getElementById(`submit-btn-${index}`).style.display = 'none';
 
+            // تأخير بسيط لالتقاط الصورة
             setTimeout(() => {
-                let targetElement = document.body;
-                try {
-                    if (window.parent && window.parent.document && window.parent.document.body) {
-                        targetElement = window.parent.document.body;
-                    }
-                } catch(e) {
-                    console.log("CORS prevented capturing parent iframe. Capturing current frame instead.");
-                }
-
+                let captureTarget = document.getElementById(`quiz-${index}`);
                 if (typeof html2canvas !== 'undefined') {
-                    html2canvas(targetElement, { scale: 2 }).then(canvas => {
+                    html2canvas(captureTarget, { scale: 2 }).then(canvas => {
                         let link = document.createElement('a');
-                        link.download = `Result.png`;
+                        link.download = `Result_Part_${index + 1}.png`;
                         link.href = canvas.toDataURL('image/png');
                         link.click();
-                        revealAllAnswers();
+                        revealAllAnswers(index);
                     }).catch(err => {
                         console.error("Error generating image:", err);
-                        revealAllAnswers();
+                        revealAllAnswers(index);
                     });
                 } else {
-                    console.warn("html2canvas library not loaded.");
-                    revealAllAnswers();
+                    revealAllAnswers(index);
                 }
             }, 600);
         }
+
+        window.onload = initQuizzes;
     </script>
 </body>
 </html>

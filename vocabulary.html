@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>اليوم المدرسيّ</title>
+    <title>اليَوْمُ المَدْرَسِيُّ</title>
     <style>
         * { box-sizing: border-box; margin: 0; padding: 0; }
 
@@ -13,7 +13,7 @@
             background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
             display: flex;
             justify-content: center;
-            padding: 15px;
+            padding: 10px; /* تم تقليل الحواف الخارجية لزيادة مساحة العرض */
             color: #333;
         }
 
@@ -25,24 +25,30 @@
         }
 
         .main-header {
-            text-align: center; padding: 20px; background: #fff;
+            text-align: center; padding: 10px; /* تم تقليل المسافة */
+            background: #fff;
             color: #667eea; border-bottom: 2px solid #f0f4f8;
         }
-        .main-header h1 { font-size: clamp(1.6rem, 5vw, 2.2rem); font-weight: bold; }
+        /* تم تصغير حجم الخط للعنوان قليلاً */
+        .main-header h1 { font-size: clamp(1.4rem, 4vw, 1.8rem); font-weight: bold; }
 
         /* ================= التابات ================= */
-        .tabs { display: flex; background: #f0f4f8; padding: 8px; gap: 8px; flex-wrap: wrap; }
+        .tabs { display: flex; background: #f0f4f8; padding: 6px; gap: 6px; flex-wrap: wrap; }
         .tab-btn {
-            flex: 1; min-width: 100px; font-family: inherit; font-size: clamp(1.1rem, 3.5vw, 1.4rem);
+            flex: 1; min-width: 90px; font-family: inherit; 
+            /* تم تصغير حجم خط التابات */
+            font-size: clamp(1rem, 3vw, 1.2rem);
             font-weight: bold; color: #555; background: transparent; border: none;
-            padding: 12px 5px; border-radius: 12px; cursor: pointer; transition: 0.3s;
+            padding: 8px 5px; /* تم تقليل المسافة الداخلية للأزرار */
+            border-radius: 12px; cursor: pointer; transition: 0.3s;
             display: flex; align-items: center; justify-content: center;
         }
         .tab-btn.active {
             color: #fff; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             box-shadow: 0 4px 10px rgba(102, 126, 234, 0.4);
         }
-        .tab-content { display: none; flex-direction: column; padding: 20px; min-height: 400px; }
+        /* تم تقليل الحد الأدنى للارتفاع لتقليل التمرير */
+        .tab-content { display: none; flex-direction: column; padding: 15px; min-height: 350px; }
         .tab-content.active { display: flex; animation: fadeIn 0.4s ease-in-out; }
 
         /* تبديل لغة التابات */
@@ -54,15 +60,16 @@
 
         .btn-action {
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white;
-            border: none; padding: 12px 25px; font-size: 1.2rem; font-weight: bold;
+            border: none; padding: 10px 20px; font-size: 1.1rem; font-weight: bold;
             border-radius: 10px; cursor: pointer; transition: transform 0.2s, box-shadow 0.2s;
-            margin-top: 15px; font-family: Arial, sans-serif; display: inline-block;
+            margin-top: 10px; font-family: Arial, sans-serif; display: inline-block;
         }
         .btn-action:hover { transform: scale(1.05); box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4); }
 
         /* ================= التاب الأول: البطاقات (3D) ================= */
         .flashcard-area { display: flex; flex-direction: column; align-items: center; justify-content: center; flex: 1; }
-        .scene { width: 100%; max-width: 320px; height: 220px; perspective: 1000px; margin-bottom: 30px; position: relative;}
+        /* تم تقليل المسافة السفلية لرفع أزرار التنقل لأعلى */
+        .scene { width: 100%; max-width: 320px; height: 210px; perspective: 1000px; margin-bottom: 15px; position: relative;}
         .card {
             width: 100%; height: 100%; position: relative; transition: transform 0.6s;
             transform-style: preserve-3d; cursor: pointer;
@@ -71,76 +78,77 @@
         .card-face {
             position: absolute; width: 100%; height: 100%; backface-visibility: hidden;
             display: flex; flex-direction: column; align-items: center; justify-content: center;
-            border-radius: 20px; box-shadow: 0 8px 20px rgba(0,0,0,0.15); font-weight: bold; text-align: center; padding: 20px;
+            border-radius: 20px; box-shadow: 0 8px 20px rgba(0,0,0,0.15); font-weight: bold; text-align: center; padding: 15px;
         }
         .card-front { background: #fff; border: 4px solid #667eea; }
         .card-back { background: #667eea; color: #fff; transform: rotateY(180deg); direction: ltr; border: 4px solid #fff;}
         
         /* أيقونة الصوت */
         .audio-icon {
-            position: absolute; top: 10px; right: 10px; font-size: 1.5rem;
-            background: #e2e8f0; border-radius: 50%; width: 40px; height: 40px;
+            position: absolute; top: 10px; right: 10px; font-size: 1.3rem;
+            background: #e2e8f0; border-radius: 50%; width: 35px; height: 35px;
             display: flex; align-items: center; justify-content: center;
             cursor: pointer; transition: 0.2s; z-index: 10;
         }
         .audio-icon:hover { background: #cbd5e0; transform: scale(1.1); }
 
-        .card-icon { font-size: 3.5rem; margin-bottom: 10px; }
-        .card-ar-text { font-size: 1.8rem; color: #333; line-height: 1.3; }
-        .card-en-text { font-size: 2rem; font-family: Arial, sans-serif; }
+        .card-icon { font-size: 3rem; margin-bottom: 5px; }
+        .card-ar-text { font-size: 1.7rem; color: #333; line-height: 1.3; }
+        .card-en-text { font-size: 1.8rem; font-family: Arial, sans-serif; }
 
-        .nav-buttons { display: flex; gap: 20px; width: 100%; justify-content: center; direction: ltr; flex-wrap: wrap; }
+        .nav-buttons { display: flex; gap: 15px; width: 100%; justify-content: center; direction: ltr; flex-wrap: wrap; }
+        /* تم تصغير أزرار التنقل قليلاً */
         .nav-btn {
-            background: #e2e8f0; color: #4a5568; border: none; padding: 10px 20px;
-            font-size: 1.2rem; font-weight: bold; border-radius: 10px; cursor: pointer;
+            background: #e2e8f0; color: #4a5568; border: none; padding: 8px 16px;
+            font-size: 1.1rem; font-weight: bold; border-radius: 10px; cursor: pointer;
             font-family: Arial, sans-serif; transition: 0.2s; box-shadow: 0 4px 6px rgba(0,0,0,0.05);
         }
         .nav-btn:hover { background: #cbd5e0; transform: translateY(-2px); }
-        .card-counter { font-size: 1.2rem; font-weight: bold; color: #666; margin-bottom: 10px; font-family: Arial, sans-serif; }
+        .card-counter { font-size: 1.1rem; font-weight: bold; color: #666; margin-bottom: 8px; font-family: Arial, sans-serif; }
 
         /* ================= التاب الثاني: نشاط 1 (MCQ) ================= */
         .mcq-container { text-align: center; flex: 1; display: flex; flex-direction: column; align-items: center; width: 100%; }
-        .mcq-status { display: flex; justify-content: space-between; width: 100%; font-size: 1.2rem; font-weight: bold; color: #555; }
-        .mcq-word { font-size: 2.5rem; font-family: Arial, sans-serif; color: #667eea; font-weight: bold; margin-bottom: 25px; direction: ltr; }
-        .options-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; width: 100%; max-width: 600px; }
+        .mcq-status { display: flex; justify-content: space-between; width: 100%; font-size: 1.1rem; font-weight: bold; color: #555; }
+        .mcq-word { font-size: 2.2rem; font-family: Arial, sans-serif; color: #667eea; font-weight: bold; margin-bottom: 20px; direction: ltr; }
+        .options-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; width: 100%; max-width: 600px; }
         @media (max-width: 500px) { .options-grid { grid-template-columns: 1fr; } }
         .option-btn {
-            background: #fff; border: 2px solid #cbd5e0; padding: 15px; border-radius: 12px;
-            font-size: 1.3rem; font-family: inherit; font-weight: bold; cursor: pointer;
+            background: #fff; border: 2px solid #cbd5e0; padding: 12px; border-radius: 12px;
+            font-size: 1.2rem; font-family: inherit; font-weight: bold; cursor: pointer;
             transition: 0.2s; box-shadow: 0 4px 6px rgba(0,0,0,0.05); color: #333; line-height: 1.4;
         }
         .option-btn:hover { border-color: #667eea; background: #f7fafc; transform: translateY(-2px); }
         .option-btn.correct { background: #48bb78; color: #fff; border-color: #48bb78; }
         .option-btn.wrong { background: #f56565; color: #fff; border-color: #f56565; }
-        .mcq-feedback { height: 30px; font-size: 1.3rem; font-weight: bold; margin-top: 15px; }
+        .mcq-feedback { height: 25px; font-size: 1.2rem; font-weight: bold; margin-top: 10px; }
 
         /* ================= التاب الثالث: اختبار (سحب وإفلات) ================= */
-        .quiz-container { display: flex; flex-direction: column; gap: 20px; flex: 1; width: 100%; }
-        .quiz-status { text-align: left; font-size: 1.2rem; font-weight: bold; color: #555; direction: ltr; margin-bottom: -10px;}
+        .quiz-container { display: flex; flex-direction: column; gap: 15px; flex: 1; width: 100%; }
+        .quiz-status { text-align: left; font-size: 1.1rem; font-weight: bold; color: #555; direction: ltr; margin-bottom: -5px;}
         .word-bank {
-            display: flex; flex-wrap: wrap; gap: 10px; justify-content: center;
-            background: #f8fafc; padding: 15px; border-radius: 15px; border: 2px dashed #cbd5e0;
-            min-height: 120px;
+            display: flex; flex-wrap: wrap; gap: 8px; justify-content: center;
+            background: #f8fafc; padding: 12px; border-radius: 15px; border: 2px dashed #cbd5e0;
+            min-height: 100px;
         }
         .word-chip {
-            background: #fff; border: 2px solid #667eea; padding: 8px 15px; border-radius: 20px;
-            font-size: 1.2rem; font-weight: bold; cursor: grab; user-select: none;
+            background: #fff; border: 2px solid #667eea; padding: 6px 12px; border-radius: 20px;
+            font-size: 1.1rem; font-weight: bold; cursor: grab; user-select: none;
             box-shadow: 0 2px 5px rgba(0,0,0,0.1); color: #4a5568; transition: 0.2s;
         }
         .word-chip:active { cursor: grabbing; transform: scale(1.05); }
         .word-chip.selected { background: #ebf4ff; border-color: #3182ce; box-shadow: 0 0 10px rgba(49, 130, 206, 0.5); }
         .word-chip.dragged { opacity: 0.5; }
 
-        .drop-rows-container { display: flex; flex-direction: column; gap: 10px; margin-top: 10px; width: 100%; }
+        .drop-rows-container { display: flex; flex-direction: column; gap: 8px; margin-top: 5px; width: 100%; }
         .drop-row {
-            display: flex; align-items: center; justify-content: space-between; gap: 10px;
-            background: #fff; padding: 10px; border-radius: 10px; box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+            display: flex; align-items: center; justify-content: space-between; gap: 8px;
+            background: #fff; padding: 8px; border-radius: 10px; box-shadow: 0 2px 5px rgba(0,0,0,0.05);
             border: 1px solid #e2e8f0; flex-wrap: wrap;
         }
-        .en-label { font-family: Arial, sans-serif; font-size: 1.1rem; font-weight: bold; color: #2d3748; width: 45%; direction: ltr; text-align: left;}
+        .en-label { font-family: Arial, sans-serif; font-size: 1rem; font-weight: bold; color: #2d3748; width: 45%; direction: ltr; text-align: left;}
         @media (max-width: 500px) { .en-label { width: 100%; text-align: center; margin-bottom: 5px; } }
         .drop-zone {
-            flex: 1; min-height: 45px; min-width: 150px; border: 2px dashed #a0aec0; border-radius: 10px;
+            flex: 1; min-height: 40px; min-width: 140px; border: 2px dashed #a0aec0; border-radius: 10px;
             display: flex; align-items: center; justify-content: center; background: #fdfdfd; transition: 0.3s;
             cursor: pointer;
         }
@@ -150,7 +158,7 @@
         .drop-zone.correct-drop { border: 2px solid #48bb78 !important; background: #c6f6d5 !important; }
         .drop-zone.wrong-drop { border: 2px solid #f56565 !important; background: #fed7d7 !important; }
 
-        .instruction-note { text-align: center; color: #718096; font-size: 1rem; margin-bottom: 5px; font-family: Arial, sans-serif; direction: ltr; }
+        .instruction-note { text-align: center; color: #718096; font-size: 0.95rem; margin-bottom: 5px; font-family: Arial, sans-serif; direction: ltr; }
         
         .hidden { display: none !important; }
     </style>
@@ -159,7 +167,7 @@
 
     <div class="activity-container">
         <div class="main-header">
-            <h1>اليوم المدرسيّ 🏫</h1>
+            <h1>اليَوْمُ المَدْرَسِيُّ 🏫</h1>
         </div>
 
         <div class="tabs">
@@ -181,11 +189,11 @@
                     <div class="card" id="flashcard">
                         <div class="card-face card-front">
                             <div class="audio-icon" onclick="playAudio(event)" title="استمع">🔊</div>
-                            <div class="card-icon" id="cardIcon">📜</div>
-                            <div class="card-ar-text" id="cardAr">القَوَانِين</div>
+                            <div class="card-icon" id="cardIcon">💡</div>
+                            <div class="card-ar-text" id="cardAr">فِي الوَاقِعِ</div>
                         </div>
                         <div class="card-face card-back">
-                            <div class="card-en-text" id="cardEn">rules</div>
+                            <div class="card-en-text" id="cardEn">in fact</div>
                         </div>
                     </div>
                 </div>
@@ -202,15 +210,15 @@
                     <span id="mcq-score-display">Score: 0</span>
                     <span id="mcq-progress">1 / 10</span>
                 </div>
-                <p class="instruction-note" style="margin-bottom: 20px;">Choose the correct answer</p>
+                <p class="instruction-note" style="margin-bottom: 15px;">Choose the correct answer</p>
                 <div class="mcq-word" id="mcq-question">Word</div>
                 <div class="options-grid" id="mcq-options">
                     </div>
                 <div class="mcq-feedback" id="mcq-feedback"></div>
             </div>
             <div id="mcq-end-screen" class="mcq-container hidden" style="justify-content: center;">
-                <h2 style="font-size: 2rem; color: #48bb78; margin-bottom: 20px;">🎉 Activity Completed!</h2>
-                <p id="mcq-final-score" style="font-size: 1.5rem; font-weight: bold; margin-bottom: 20px;"></p>
+                <h2 style="font-size: 1.8rem; color: #48bb78; margin-bottom: 20px;">🎉 Activity Completed!</h2>
+                <p id="mcq-final-score" style="font-size: 1.4rem; font-weight: bold; margin-bottom: 20px;"></p>
                 <button class="btn-action" onclick="initMCQ()">Play Again</button>
             </div>
         </div>
@@ -238,42 +246,42 @@
     <script>
         // ================= البيانات الجديدة: اليوم المدرسي =================
         const vocabData = [
-            { ar: "القَوَانِين", en: "rules", icon: "📜" },
-            { ar: "صَارِمَة", en: "strict", icon: "🛑" },
-            { ar: "مَرِنَة", en: "flexible", icon: "🧘" },
-            { ar: "عَادِلَة", en: "fair", icon: "⚖️" },
-            { ar: "الزِّي المَدْرَسِيّ", en: "school uniform", icon: "👔" },
-            { ar: "ارْتِدَاء المُجَوْهَرَات", en: "wearing jewelry", icon: "💍" },
-            { ar: "نَضَعُ مَسَاحِيقَ التَّجْمِيل", en: "we put makeup", icon: "💄" },
-            { ar: "أَنِيق", en: "elegant", icon: "✨" },
-            { ar: "عَمَلِيّ", en: "practical", icon: "🛠️" },
+            { ar: "فِي الوَاقِعِ", en: "in fact", icon: "💡" },
+            { ar: "تَبْدَأُ", en: "to start", icon: "🏁" },
+            { ar: "تَنْتَهِي", en: "end", icon: "🛑" },
+            { ar: "مَا عَدَا", en: "except for", icon: "🚫" },
+            { ar: "مُدَّتُهُ", en: "it's duration", icon: "⏳" },
+            { ar: "مَرَافِقُ رِيَاضِيَّةٌ", en: "sports facilities", icon: "⚽" },
+            { ar: "مَسْبَحٌ", en: "swimming pool", icon: "🏊" },
+            { ar: "مَلْعَبٌ رِيَاضِيٌّ", en: "sports field", icon: "🏟️" },
+            { ar: "مَعَامِلُ", en: "laboratories", icon: "🔬" },
+            { ar: "قَاعَاتٌ إِعْلَامِيَّةٌ", en: "briefing rooms", icon: "📰" },
+            { ar: "مَقْصَفٌ", en: "canteen", icon: "🥪" },
+            { ar: "ثَانَوِيَّةٌ", en: "secondary", icon: "🏫" },
+            { ar: "مُخْتَلِطَةٌ", en: "mixed", icon: "👫" },
+            { ar: "جِنْسِيَّاتٌ", en: "nationalities", icon: "🌍" },
+            { ar: "اسْتِرَاحَةٌ", en: "rest period, break", icon: "☕" },
+            { ar: "مُنَظَّمٌ", en: "organized", icon: "📋" },
+            { ar: "الفُطُورُ", en: "breakfast", icon: "🍳" },
+            { ar: "الغَدَاءُ", en: "lunch", icon: "🍛" },
+            { ar: "قَبْلَ", en: "before", icon: "⏪" },
+            { ar: "بَعْدَ", en: "after", icon: "⏩" },
+            { ar: "القَوَانِينُ", en: "rules", icon: "📜" },
+            { ar: "صَارِمَةٌ", en: "strict", icon: "😠" },
+            { ar: "مَرِنَةٌ", en: "flexible", icon: "🤸" },
+            { ar: "عَادِلَةٌ", en: "fair", icon: "⚖️" },
+            { ar: "الزِّيُّ المَدْرَسِيُّ", en: "school uniform", icon: "👔" },
+            { ar: "ارْتِدَاءُ المَجُوهَرَاتِ", en: "wearing jewelry", icon: "💍" },
+            { ar: "نَضَعُ مَسَاحِيقَ التَّجْمِيلِ", en: "we put makeup", icon: "💄" },
+            { ar: "أَنِيقٌ", en: "elegant", icon: "🕴️" },
+            { ar: "عَمَلِيٌّ", en: "practical", icon: "🛠️" },
             { ar: "نَرْتَدِي", en: "we wear", icon: "👕" },
-            { ar: "عَادِيّ", en: "normal, usual, ordinary", icon: "😐" },
-            { ar: "قَمِيصاً أَبْيَضاً", en: "shirt white", icon: "🥼" },
-            { ar: "بِنْطَالاً أَخْضَراً", en: "pants green", icon: "👖" },
-            { ar: "الطَّبَقَات الِاجْتِمَاعِيَّة", en: "Social Classes", icon: "👥" },
-            { ar: "لَا يُمْكِنُكَ ارْتِدَاء", en: "you cannot wear", icon: "🚫" },
-            { ar: "حُجِزْتُ بَعْدَ المَدْرَسَة", en: "i got detention after school", icon: "🏫" },
-            { ar: "فِي الوَاقِع", en: "in fact", icon: "💡" },
-            { ar: "تَبْدَأ", en: "to start", icon: "🟢" },
-            { ar: "تَنْتَهِي", en: "end", icon: "🔴" },
-            { ar: "مَا عَدَا", en: "except for", icon: "➖" },
-            { ar: "مُدَّتُه", en: "it's duration", icon: "⏱️" },
-            { ar: "مَرَافِق رِيَاضِيَّة", en: "sports facilities", icon: "🏟️" },
-            { ar: "مَسْبَح", en: "swimming pool", icon: "🏊" },
-            { ar: "مَلْعَب رِيَاضِيّ", en: "sports field", icon: "⚽" },
-            { ar: "مَعَامِل", en: "laboratories", icon: "🔬" },
-            { ar: "قَاعَات إِعْلَامِيَّة", en: "briefing rooms", icon: "💻" },
-            { ar: "مَقْصَف", en: "canteen", icon: "🥪" },
-            { ar: "ثَانَوِيَّة", en: "secondary", icon: "🏫" },
-            { ar: "مُخْتَلِطَة", en: "mixed", icon: "👫" },
-            { ar: "جِنْسِيَّات", en: "nationalities", icon: "🌍" },
-            { ar: "اسْتِرَاحَة", en: "rest period, break", icon: "☕" },
-            { ar: "مُنَظَّم", en: "organized", icon: "📅" },
-            { ar: "الفُطُور", en: "breakfast", icon: "🥐" },
-            { ar: "الغَدَاء", en: "lunch", icon: "🍛" },
-            { ar: "قَبْل", en: "before", icon: "⏪" },
-            { ar: "بَعْد", en: "after", icon: "⏩" }
+            { ar: "عَادِيٌّ", en: "normal, usual, ordinary", icon: "😐" },
+            { ar: "قَمِيصًا أَبْيَضَ", en: "shirt white", icon: "🥼" },
+            { ar: "بِنْطَالًا أَخْضَرَ", en: "pants green", icon: "👖" },
+            { ar: "الطَّبَقَاتُ الِاجْتِمَاعِيَّةُ", en: "Social Classes", icon: "📊" },
+            { ar: "لَا يُمْكِنُكَ ارْتِدَاءُ", en: "you cannot wear", icon: "⛔" },
+            { ar: "حُجِزْتُ بَعْدَ المَدْرَسَةِ", en: "i got detention after school", icon: "🏫" }
         ];
 
         // وظائف مساعدة
@@ -546,21 +554,19 @@
             processDropMatch(selectedChipNode, this);
         }
 
-        // دالة لإرجاع الكلمة للبنك إذا غير الطالب رأيه (قبل التحقق)
         function handlePlacedChipClick(e) {
             e.stopPropagation();
-            if(!document.getElementById('play-again-quiz-btn').classList.contains('hidden')) return; // تم التحقق، لا يمكن التعديل
+            if(!document.getElementById('play-again-quiz-btn').classList.contains('hidden')) return; 
 
             const zone = this.parentElement;
             document.getElementById('word-bank').appendChild(this);
             zone.classList.remove('filled');
             
-            // إعادة خصائص الكلمة كما كانت
             this.style.cursor = 'grab';
             this.style.border = '2px solid #667eea';
             this.style.background = '#fff';
             this.style.boxShadow = '0 2px 5px rgba(0,0,0,0.1)';
-            this.style.padding = '8px 15px';
+            this.style.padding = '6px 12px';
             this.setAttribute('draggable', 'true');
             this.addEventListener('click', handleChipClick);
             this.removeEventListener('click', handlePlacedChipClick);
@@ -575,7 +581,6 @@
             zoneEl.appendChild(chipEl);
             zoneEl.classList.add('filled');
             
-            // إخفاء حدود الكلمة وجعلها جزءاً من الصندوق، لكن تبقى قابلة للضغط لإزالتها
             chipEl.removeEventListener('click', handleChipClick);
             chipEl.addEventListener('click', handlePlacedChipClick);
             chipEl.setAttribute('draggable', 'false');
@@ -615,7 +620,6 @@
                     } else {
                         zone.classList.add('wrong-drop');
                     }
-                    // إغلاق الكلمة تماماً
                     chip.removeEventListener('click', handlePlacedChipClick);
                     chip.style.cursor = 'default';
                 }
@@ -625,7 +629,6 @@
             scoreDisplay.innerText = `Final Score: ${score} / 10`;
             scoreDisplay.style.color = score >= 5 ? '#48bb78' : '#f56565';
             
-            // قفل الكلمات المتبقية في البنك
             const remainingChips = document.querySelectorAll('.word-bank .word-chip');
             remainingChips.forEach(c => {
                 c.setAttribute('draggable', 'false');
